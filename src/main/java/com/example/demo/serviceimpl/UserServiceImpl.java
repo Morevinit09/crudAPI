@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.dto.UserDto;
 import com.example.demo.entity.UserEntity;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.UserService;
@@ -17,18 +18,27 @@ public class UserServiceImpl implements UserService {
 	private UserRepository repository;
 
 	@Override
-	public String addUserInfo(UserEntity userEntity) {
+	public String addUserInfo(UserDto userdto) {
+
+		UserEntity userEntity = new UserEntity();
+		
+		userEntity.setUserName(userdto.getUserName());
+		userEntity.setEmail(userdto.getEmail());
+		userEntity.setMobileNumber(userdto.getMobileNumber());
+		userEntity.setUserAddress(userdto.getUserAddress());
+		userEntity.setUserDob(userdto.getDob());
 		repository.save(userEntity);
 		return "Added";
 	}
 
 	@Override
 	public List<UserEntity> getAllUsers() {
-		return repository.findAll();
+		List<UserEntity> getall = repository.findAll();
+		return getall;
 	}
 
 	@Override
-	public UserEntity update(Long userId, UserEntity uentity) {
+	public UserEntity update(Long userId, UserDto userDto) {
 
 		Optional<UserEntity> user = repository.findById(userId);
 
@@ -36,9 +46,9 @@ public class UserServiceImpl implements UserService {
 
 			UserEntity userEntity = user.get();
 
-			userEntity.setUserName(uentity.getUserName());
-			userEntity.setEmail(uentity.getEmail());
-			userEntity.setMobileNumber(uentity.getMobileNumber());
+			userEntity.setUserName(userDto.getUserName());
+			userEntity.setEmail(userDto.getEmail());
+			userEntity.setMobileNumber(userDto.getMobileNumber());
 
 			return repository.save(userEntity);
 		} else {
@@ -49,7 +59,14 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public String deleteUserById(Long userId) {
-		repository.deleteById(userId);
+		Optional<UserEntity> findbyuserid = repository.findById(userId);
+		if (findbyuserid.isPresent()) {
+			UserEntity userEntity = findbyuserid.get();
+
+			userEntity.setUserStatus("N");
+			repository.save(userEntity);
+		}
+
 		return "Deleted Successfully";
 	}
 
