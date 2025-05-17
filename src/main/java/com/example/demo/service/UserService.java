@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.example.demo.dto.UserDto;
 import com.example.demo.entity.UserEntity;
+import com.example.demoPaagination.UserPagination;
 
 public interface UserService {
 
@@ -15,9 +16,11 @@ public interface UserService {
 	
 	public String deleteUserById(Long userId);
 
-	public UserEntity update(Long userId, UserDto userDto);
+	public String update(Long userId, UserDto userdto);
 	
+	public UserDto userFindById(Long userId) ;
 
+	List<UserEntity> findAllWithPagination(UserPagination pagination);
 
 
 
