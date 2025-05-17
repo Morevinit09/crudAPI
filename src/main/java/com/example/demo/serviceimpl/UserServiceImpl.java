@@ -14,8 +14,10 @@ import com.example.demo.enums.Gender;
 import com.example.demo.enums.Title;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.UserService;
+import com.example.demoPaagination.CustomResponse;
 import com.example.demoPaagination.SearchFilter;
 import com.example.demoPaagination.UserPagination;
+import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -156,10 +158,7 @@ public class UserServiceImpl implements UserService {
 		return "User Added Successfully";
 	}
 
-	private Exception IllegalArgumentException(String string) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	
 
 	@Override
 	public String update(Long userId, UserDto userdto) {
@@ -346,7 +345,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public List<UserEntity> findAllWithPagination(UserPagination pagination) {
+	public List<?> findAllWithPagination(UserPagination pagination) {
 
 		CriteriaBuilder cb = entityManager.getCriteriaBuilder();// object of criteriaBuilder
 		CriteriaQuery<UserEntity> cq = cb.createQuery(UserEntity.class);// root CriteriaQuery
@@ -354,39 +353,57 @@ public class UserServiceImpl implements UserService {
 
 		List<Predicate> predicates = new ArrayList<>();// empty array list
 
-		SearchFilter searchFilter = pagination.getSearchFilter();// search filter obj
+		SearchFilter searchFilter = pagination.getSearchFilter();// search filter object
 
 		// Apply filters if available
 		if (searchFilter != null) {
 			String userfullName = searchFilter.getUserfullName();
 			String mobileNumber = searchFilter.getMobileNumber();
 			String email = searchFilter.getEmail();
+			String usercity = searchFilter.getUsercity();
+			String userstate = searchFilter.getUserstate();
+			String aadharnumber = searchFilter.getAadharnumber();
+			
+			
 
 			if (userfullName != null && !userfullName.trim().isEmpty()) {
 				predicates.add(cb.like(cb.lower(root.get("userfullName")), "%" + userfullName.toLowerCase() + "%"));
 			}
 
 			if (mobileNumber != null && !mobileNumber.trim().isEmpty()) {
-				predicates.add(cb.like(cb.lower(root.get("mobileNumber")), "%" + mobileNumber.toLowerCase() + "%"));
+				predicates.add(cb.equal(cb.lower(root.get("mobileNumber")), "%" + mobileNumber.toLowerCase() + "%"));
 			}
 
 			if (email != null && !email.trim().isEmpty()) {
 				predicates.add(cb.like(cb.lower(root.get("email")), "%" + email.toLowerCase() + "%"));
 			}
+			if (usercity != null && !usercity.trim().isEmpty()) {
+				predicates.add(cb.like(cb.lower(root.get("usercity")), "%" + usercity.toLowerCase() + "%"));
+			}
+			if (userstate != null && !userstate.trim().isEmpty()) {
+				predicates.add(cb.like(cb.lower(root.get("usercity")), "%" + userstate.toLowerCase() + "%"));
+			}
+			if (aadharnumber != null && !aadharnumber.trim().isEmpty()) {
+				predicates.add(cb.like(cb.lower(root.get("usercity")), "%" + aadharnumber.toLowerCase() + "%"));
+			}
+
 		}
+		
+		
 
 		// Apply status filter: userstatus = 'Y'
 		predicates.add(cb.equal(root.get("userstatus"), 'Y'));
-		
+
 		// Add all predicates to WHERE clause
 		cq.where(cb.and(predicates.toArray(new Predicate[0])));
 
 		// Sorting
-		String sortBy = (pagination.getSortBy() != null && !pagination.getSortBy().trim().isEmpty())//id,name
+		String sortBy = (pagination.getSortBy() != null && !pagination.getSortBy().trim().isEmpty())// id,name
 				? pagination.getSortBy()
 				: "userId";
 
-		String sortOrder = (pagination.getSortOrder() != null && !pagination.getSortOrder().trim().isEmpty()) //asc || desc
+		String sortOrder = (pagination.getSortOrder() != null && !pagination.getSortOrder().trim().isEmpty()) // asc ||
+																												// desc
 				? pagination.getSortOrder()
 				: "desc";
 
@@ -414,7 +431,23 @@ public class UserServiceImpl implements UserService {
 		query.setFirstResult((page - 1) * size);
 		query.setMaxResults(size);
 
-		return query.getResultList();
+		List<UserEntity> entity= query.getResultList();
+		
+		List<CustomResponse> requiredList=new ArrayList<>();
+		
+		for (UserEntity userEntity : entity) {
+			
+			CustomResponse custome=new CustomResponse();
+			
+			custome.setAadharnumber(userEntity.getAadharnumber());
+			custome.setEmail(userEntity.getEmail());
+			custome.setMobileNumber(userEntity.getMobileNumber());
+			
+			requiredList.add(custome);
+		}
+		
+		return requiredList;
 	}
+	
 
 }

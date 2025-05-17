@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.dto.UserDto;
 import com.example.demo.entity.UserEntity;
 import com.example.demo.serviceimpl.UserServiceImpl;
+import com.example.demoPaagination.CustomResponse;
+import com.example.demoPaagination.SearchFilter;
 import com.example.demoPaagination.UserPagination;
 import com.example.demoresponse.Response;
 
@@ -55,7 +57,7 @@ public class UserController {
 	public Response allUsers(@RequestBody UserPagination pagination) {
 		Response response = new Response();
 		try {
-			List<UserEntity> allUsers = serviceImpl.findAllWithPagination(pagination);
+			List<?> allUsers = serviceImpl.findAllWithPagination(pagination);
 			response.setData(allUsers);
 			response.setStatus(true);
 			response.setMessage("success");
@@ -74,6 +76,8 @@ public class UserController {
 		}
 		return response;
 	}
+	
+	
 	
 	
 
