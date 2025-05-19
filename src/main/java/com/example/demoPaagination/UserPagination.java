@@ -1,5 +1,7 @@
 package com.example.demoPaagination;
 
+import java.util.List;
+
 public class UserPagination {
 	private Integer page;
 
@@ -8,16 +10,10 @@ public class UserPagination {
 	private String sortBy;
 
 	private String sortOrder;
-
-	private SearchFilter searchFilter;
-
-	public SearchFilter getSearchFilter() {
-		return searchFilter;
-	}
-
-	public void setSearchFilter(SearchFilter searchFilter) {
-		this.searchFilter = searchFilter;
-	}
+	
+   private List<SearchFilter> searchFilter;
+ 
+	
 
 	public UserPagination(Integer page, Integer size, String sortBy, String sortOrder) {
 		super();
@@ -64,4 +60,13 @@ public class UserPagination {
 		this.sortOrder = sortOrder;
 	}
 
+	public List<SearchFilter> getSearchFilter() {
+		return searchFilter;
+	}
+
+	public void setSearchFilter(List<SearchFilter> searchFilter) {
+		this.searchFilter = searchFilter;
+	}
+
+	
 }

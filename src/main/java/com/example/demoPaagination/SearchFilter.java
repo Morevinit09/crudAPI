@@ -5,6 +5,18 @@ public class SearchFilter {
 	private String mobileNumber;
 	private String email;
 	private String aadharnumber;
+	private Long userId;
+	
+	
+	
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
+
 	public String getAadharnumber() {
 		return aadharnumber;
 	}
@@ -55,5 +67,6 @@ public class SearchFilter {
 	public void setUserfullName(String userfullName) {
 		this.userfullName = userfullName;
 	}
+
 
 }

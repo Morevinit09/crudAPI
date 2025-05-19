@@ -4,6 +4,15 @@ public class CustomResponse {
 	private String userfullName;
 	private String mobileNumber;
 	private String email;
+	private Long userId;
+	
+	
+	public Long getUserId() {
+		return userId;
+	}
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
 	public String getUserfullName() {
 		return userfullName;
 		

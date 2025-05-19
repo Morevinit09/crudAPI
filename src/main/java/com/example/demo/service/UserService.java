@@ -1,10 +1,12 @@
 package com.example.demo.service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.example.demo.dto.UserDto;
 import com.example.demo.entity.UserEntity;
 import com.example.demoPaagination.CustomResponse;
+import com.example.demoPaagination.SearchFilter;
 import com.example.demoPaagination.UserPagination;
 
 public interface UserService {
@@ -21,7 +23,7 @@ public interface UserService {
 	
 	public UserDto userFindById(Long userId) ;
 
-	List<?> findAllWithPagination(UserPagination pagination);
+	public List<?> findAllWithPagination(UserPagination pagination);
 
 
 

@@ -2,8 +2,11 @@ package com.example.demo.serviceimpl;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,10 +17,8 @@ import com.example.demo.enums.Gender;
 import com.example.demo.enums.Title;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.UserService;
-import com.example.demoPaagination.CustomResponse;
 import com.example.demoPaagination.SearchFilter;
 import com.example.demoPaagination.UserPagination;
-import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -157,8 +158,6 @@ public class UserServiceImpl implements UserService {
 		System.out.println(" userStatus   " + userStatus);
 		return "User Added Successfully";
 	}
-
-	
 
 	@Override
 	public String update(Long userId, UserDto userdto) {
@@ -343,111 +342,116 @@ public class UserServiceImpl implements UserService {
 		return dto;
 
 	}
-
 	@Override
-	public List<?> findAllWithPagination(UserPagination pagination) {
+	public List<Map<String, Object>> findAllWithPagination(UserPagination pagination) {
+	    CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+	    CriteriaQuery<UserEntity> cq = cb.createQuery(UserEntity.class);
+	    Root<UserEntity> root = cq.from(UserEntity.class);
 
-		CriteriaBuilder cb = entityManager.getCriteriaBuilder();// object of criteriaBuilder
-		CriteriaQuery<UserEntity> cq = cb.createQuery(UserEntity.class);// root CriteriaQuery
-		Root<UserEntity> root = cq.from(UserEntity.class);// object root
+	    List<Predicate> predicates = new ArrayList<>();
+	    List<SearchFilter> searchFilters = pagination.getSearchFilter();
 
-		List<Predicate> predicates = new ArrayList<>();// empty array list
+	    // Apply filters (same as before)
+	    if (searchFilters != null && !searchFilters.isEmpty()) {
+	        for (SearchFilter searchFilter : searchFilters) {
+	            String userfullName = searchFilter.getUserfullName();
+	            String mobileNumber = searchFilter.getMobileNumber();
+	            String email = searchFilter.getEmail();
+	            String usercity = searchFilter.getUsercity();
+	            String userstate = searchFilter.getUserstate();
+	            String aadharnumber = searchFilter.getAadharnumber();
 
-		SearchFilter searchFilter = pagination.getSearchFilter();// search filter object
+	            if (userfullName != null && !userfullName.trim().isEmpty()) {
+	                predicates.add(cb.like(cb.lower(root.get("userfullName")), "%" + userfullName.toLowerCase() + "%"));
+	            }
+	            if (mobileNumber != null && !mobileNumber.trim().isEmpty()) {
+	                predicates.add(cb.equal(cb.lower(root.get("mobileNumber")), mobileNumber.toLowerCase()));
+	            }
+	            if (email != null && !email.trim().isEmpty()) {
+	                predicates.add(cb.like(cb.lower(root.get("email")), "%" + email.toLowerCase() + "%"));
+	            }
+	            if (usercity != null && !usercity.trim().isEmpty()) {
+	                predicates.add(cb.like(cb.lower(root.get("usercity")), "%" + usercity.toLowerCase() + "%"));
+	            }
+	            if (userstate != null && !userstate.trim().isEmpty()) {
+	                predicates.add(cb.like(cb.lower(root.get("userstate")), "%" + userstate.toLowerCase() + "%"));
+	            }
+	            if (aadharnumber != null && !aadharnumber.trim().isEmpty()) {
+	                predicates.add(cb.like(cb.lower(root.get("aadharnumber")), "%" + aadharnumber.toLowerCase() + "%"));
+	            }
+	        }
+	    }
 
-		// Apply filters if available
-		if (searchFilter != null) {
-			String userfullName = searchFilter.getUserfullName();
-			String mobileNumber = searchFilter.getMobileNumber();
-			String email = searchFilter.getEmail();
-			String usercity = searchFilter.getUsercity();
-			String userstate = searchFilter.getUserstate();
-			String aadharnumber = searchFilter.getAadharnumber();
-			
-			
+	    // Apply status filter
+	    predicates.add(cb.equal(root.get("userstatus"), 'Y'));
 
-			if (userfullName != null && !userfullName.trim().isEmpty()) {
-				predicates.add(cb.like(cb.lower(root.get("userfullName")), "%" + userfullName.toLowerCase() + "%"));
-			}
+	    // Add predicates to the WHERE clause
+	    cq.where(cb.and(predicates.toArray(new Predicate[0])));
 
-			if (mobileNumber != null && !mobileNumber.trim().isEmpty()) {
-				predicates.add(cb.equal(cb.lower(root.get("mobileNumber")), "%" + mobileNumber.toLowerCase() + "%"));
-			}
+	    // Sorting logic
+	    String sortBy = (pagination.getSortBy() != null && !pagination.getSortBy().trim().isEmpty())
+	            ? pagination.getSortBy()
+	            : "userId";
 
-			if (email != null && !email.trim().isEmpty()) {
-				predicates.add(cb.like(cb.lower(root.get("email")), "%" + email.toLowerCase() + "%"));
-			}
-			if (usercity != null && !usercity.trim().isEmpty()) {
-				predicates.add(cb.like(cb.lower(root.get("usercity")), "%" + usercity.toLowerCase() + "%"));
-			}
-			if (userstate != null && !userstate.trim().isEmpty()) {
-				predicates.add(cb.like(cb.lower(root.get("usercity")), "%" + userstate.toLowerCase() + "%"));
-			}
-			if (aadharnumber != null && !aadharnumber.trim().isEmpty()) {
-				predicates.add(cb.like(cb.lower(root.get("usercity")), "%" + aadharnumber.toLowerCase() + "%"));
-			}
+	    String sortOrder = (pagination.getSortOrder() != null && !pagination.getSortOrder().trim().isEmpty())
+	            ? pagination.getSortOrder()
+	            : "desc";
 
-		}
-		
-		
+	    if ("desc".equalsIgnoreCase(sortOrder)) {
+	        cq.orderBy(cb.desc(root.get(sortBy)));
+	    } else {
+	        cq.orderBy(cb.asc(root.get(sortBy)));
+	    }
 
-		// Apply status filter: userstatus = 'Y'
-		predicates.add(cb.equal(root.get("userstatus"), 'Y'));
+	    // Create query
+	    TypedQuery<UserEntity> query = entityManager.createQuery(cq);
 
-		// Add all predicates to WHERE clause
-		cq.where(cb.and(predicates.toArray(new Predicate[0])));
+	    // Pagination logic
+	    Integer page = pagination.getPage();
+	    Integer size = pagination.getSize();
 
-		// Sorting
-		String sortBy = (pagination.getSortBy() != null && !pagination.getSortBy().trim().isEmpty())// id,name
-				? pagination.getSortBy()
-				: "userId";
+	    if ((page == null || page == 0) && (size == null || size == 0)) {
+	        return query.getResultList().stream().map(this::convertToMap).collect(Collectors.toList());
+	    }
 
-		String sortOrder = (pagination.getSortOrder() != null && !pagination.getSortOrder().trim().isEmpty()) // asc ||
-																												// desc
-				? pagination.getSortOrder()
-				: "desc";
+	    if (page == null || size == null || page <= 0 || size <= 0) {
+	        throw new IllegalArgumentException("Page and size must be greater than or equal to 0.");
+	    }
 
-		if ("desc".equalsIgnoreCase(sortOrder)) {
-			cq.orderBy(cb.desc(root.get(sortBy)));
-		} else {
-			cq.orderBy(cb.asc(root.get(sortBy)));
-		}
+	    query.setFirstResult((page - 1) * size);
+	    query.setMaxResults(size);
 
-		// Create query
-		TypedQuery<UserEntity> query = entityManager.createQuery(cq);
-
-		// Pagination
-		Integer page = pagination.getPage();
-		Integer size = pagination.getSize();
-
-		if ((page == null || page == 0) && (size == null || size == 0)) {
-			return query.getResultList();
-		}
-
-		if (page == null || size == null || page < 0 || size < 0) {
-			throw new IllegalArgumentException("Page and size must be greater than 0.");
-		}
-
-		query.setFirstResult((page - 1) * size);
-		query.setMaxResults(size);
-
-		List<UserEntity> entity= query.getResultList();
-		
-		List<CustomResponse> requiredList=new ArrayList<>();
-		
-		for (UserEntity userEntity : entity) {
-			
-			CustomResponse custome=new CustomResponse();
-			
-			custome.setAadharnumber(userEntity.getAadharnumber());
-			custome.setEmail(userEntity.getEmail());
-			custome.setMobileNumber(userEntity.getMobileNumber());
-			
-			requiredList.add(custome);
-		}
-		
-		return requiredList;
+	    // Directly convert to List<Map<String, Object>>
+	    if(query.getResultList().stream().map(this::convertToMap).collect(Collectors.toList()).isEmpty()) {
+	    	 throw new IllegalArgumentException("User not found");
+	    }
+	    
+	    return query.getResultList().stream().map(this::convertToMap).collect(Collectors.toList());
 	}
-	
+
+	// Map all fields
+	private Map<String, Object> convertToMap(UserEntity userEntity) {
+	    Map<String, Object> map = new HashMap<>();
+	    map.put("userId", userEntity.getUserId());
+	    map.put("userdob", userEntity.getUserdob());
+	    map.put("useraddress", userEntity.getUseraddress());
+	    map.put("useraddress1", userEntity.getUseraddress1());
+	    map.put("useraddress2", userEntity.getUseraddress2());
+	    map.put("useraddress3", userEntity.getUseraddress3());
+	    map.put("usercity", userEntity.getUsercity());
+	    map.put("userstate", userEntity.getUserstate());
+	    map.put("userfullName", userEntity.getUserfullName());
+	    map.put("email", userEntity.getEmail());
+	    map.put("mobileNumber", userEntity.getMobileNumber());
+	    map.put("alternatemobileno", userEntity.getAlternatemobileno());
+	    map.put("annualincome", userEntity.getAnnualincome());
+	    map.put("userstatus", userEntity.getUserstatus());
+	    map.put("pannumber", userEntity.getPannumber());
+	    map.put("aadharnumber", userEntity.getAadharnumber());
+	    map.put("gender", userEntity.getGender());
+	    map.put("title", userEntity.getTitle());
+	    return map;
+	}
+
 
 }
