@@ -13,28 +13,28 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.Pagination.UserPagination;
 import com.example.demo.dto.UserDto;
 import com.example.demo.entity.UserEntity;
+import com.example.demo.response.Response;
 import com.example.demo.serviceimpl.UserServiceImpl;
-import com.example.demoPaagination.CustomResponse;
-import com.example.demoPaagination.SearchFilter;
-import com.example.demoPaagination.UserPagination;
-import com.example.demoresponse.Response;
 
 @RestController
 @RequestMapping("/user")
 public class UserController {
 
 	@Autowired
-	private UserServiceImpl serviceImpl;      
+	private UserServiceImpl serviceImpl;
+	
+	
+	
 
 	@PostMapping("/add")
 	public Response putUser(@RequestBody UserDto userdto) {
 		Response response = new Response();
 		try {
 			String userInfo = serviceImpl.addUserInfo(userdto);
-			
-			
+
 			response.setData(userInfo);
 			response.setMessage("succsess");
 
@@ -43,7 +43,7 @@ public class UserController {
 			response.setStatus(true);
 			response.setData(new ArrayList<>());
 			response.setMessage(e.getMessage());
-		} catch (Exception e) {                                                                                                                                
+		} catch (Exception e) {
 			e.printStackTrace();
 			response.setData(new ArrayList<>());
 			response.setStatus(true);
@@ -76,10 +76,6 @@ public class UserController {
 		}
 		return response;
 	}
-	
-	
-	
-	
 
 	@GetMapping("/allUser")
 	public Response getAllUsers() {
@@ -101,6 +97,7 @@ public class UserController {
 		return response;
 
 	}
+
 	@GetMapping("/list/{userId}")
 	public Response getResponse(@PathVariable Long userId) {
 		Response response = new Response();
@@ -109,12 +106,11 @@ public class UserController {
 			response.setData(dto);
 			response.setStatus(true);
 			response.setMessage("succsess");
-			
-		}catch (Exception e) {
+
+		} catch (Exception e) {
 			response.setData(new ArrayList<>());
-			response.setStatus(true);
 			response.setMessage("succsess");
-			
+			response.setStatus(false);
 			// TODO: handle exception
 		}
 		return response;
@@ -142,10 +138,10 @@ public class UserController {
 	}
 
 	@DeleteMapping("/delete/{userId}")
-	public Response deleteUserById(@PathVariable Long userId) {
+	public void deleteUserById(@PathVariable Long userId) {
 		Response response = new Response();
 		try {
-			String deleteUserById = serviceImpl.deleteUserById(userId);
+			Void deleteUserById = serviceImpl.deleteUserById(userId);
 			response.setData(deleteUserById);
 			response.setStatus(true);
 			response.setMessage("succsess");
@@ -157,12 +153,33 @@ public class UserController {
 			response.setMessage("Fail");
 		}
 
-		return response;
 	}
 
-	
-	
-	
-	
-}
+//	@GetMapping("/download_Sample_excel")
+//	public Response generateSampleExcellSheet()
+//	{
+//		Response response=new Response();
+//		
+//		try {
+//			
+//		String msg=	serviceImpl.generateExcelFile();
+//			
+//			response.setData(msg);
+//			response.setMessage("Success");
+//			response.setStatus(true);
+//			response.setTotalRecords(0);
+//			
+//			
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//			
+//			response.setData(new ArrayList<>());
+//			response.setMessage("Failed");
+//			response.setStatus(false);
+//			response.setTotalRecords(0);
+//		}
+//		
+//		return response;
+//	}
 
+}

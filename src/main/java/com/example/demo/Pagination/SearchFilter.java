@@ -1,4 +1,4 @@
-package com.example.demoPaagination;
+package com.example.demo.Pagination;
 
 public class SearchFilter {
 	private String userfullName;

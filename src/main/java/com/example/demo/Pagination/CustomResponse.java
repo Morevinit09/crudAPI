@@ -1,4 +1,4 @@
-package com.example.demoPaagination;
+package com.example.demo.Pagination;
 
 public class CustomResponse {
 	private String userfullName;

@@ -1,4 +1,4 @@
- package com.example.demoresponse;
+ package com.example.demo.response;
 
 public class Response {
 	private Object Data;

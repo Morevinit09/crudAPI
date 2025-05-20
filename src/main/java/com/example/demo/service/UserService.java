@@ -1,35 +1,27 @@
 package com.example.demo.service;
 
 import java.util.List;
-import java.util.Map;
 
+import com.example.demo.Pagination.UserPagination;
 import com.example.demo.dto.UserDto;
 import com.example.demo.entity.UserEntity;
-import com.example.demoPaagination.CustomResponse;
-import com.example.demoPaagination.SearchFilter;
-import com.example.demoPaagination.UserPagination;
 
 public interface UserService {
 
-	public String addUserInfo(UserDto  userdto);
+	public String addUserInfo(UserDto userdto);
 
 	public List<UserEntity> getAllUsers();
-	
-	//public	UserEntity update(Long userId, UserEntity);
-	
-	public String deleteUserById(Long userId);
+
+	// public UserEntity update(Long userId, UserEntity);
+
+	public Void deleteUserById(Long userId);
 
 	public String update(Long userId, UserDto userdto);
-	
-	public UserDto userFindById(Long userId) ;
+
+	public UserDto userFindById(Long userId);
 
 	public List<?> findAllWithPagination(UserPagination pagination);
-
-
-
-
-
-
-
+	
+	//public String generateExcelFile() throws IOException;
 
 }
