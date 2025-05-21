@@ -1,8 +1,10 @@
 package com.example.demo.dto;
 
 import java.util.Date;
+
 import com.example.demo.enums.Gender;
-import com.example.demo.enums.Title;
+import com.example.demo.enums.title;
+
 
 public class UserDto {
 
@@ -28,7 +30,7 @@ public class UserDto {
 
 	private Gender gender;
 
-	private Title title;
+	private title title;
 	
 	
 	public String getUseraddress() {
@@ -160,12 +162,14 @@ public class UserDto {
 		return gender;
 	}
 
-	
-	public Title getTitle() {
+	public com.example.demo.enums.title getTitle() {
 		return title;
 	}
 
-	public void setTitle(Title title) {
+	public void setTitle(com.example.demo.enums.title title) {
 		this.title = title;
 	}
+
+	
+	
 }

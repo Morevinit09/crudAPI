@@ -1,22 +1,32 @@
+
+
+
+
 package com.example.demo.serviceimpl;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.Pagination.SearchFilter;
 import com.example.demo.Pagination.UserPagination;
 import com.example.demo.dto.UserDto;
 import com.example.demo.entity.UserEntity;
-import com.example.demo.enums.Gender;
-import com.example.demo.enums.Title;
+import com.example.demo.enums.title;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.UserService;
 
@@ -124,14 +134,14 @@ public class UserServiceImpl implements UserService {
 		}
 
 //GENDER Validation and Mapping 
-		Gender gender = userdto.getGender();
+	  com.example.demo.enums.Gender gender = userdto.getGender();
 		if (gender == null) {
 			throw new IllegalArgumentException("Enter gender");
 		}
 		entity.setGender(gender);
 
 		// Title Validation and Mapping
-		Title title = userdto.getTitle();
+		title title = userdto.getTitle();
 		if (title == null) {
 			throw new IllegalArgumentException("Enter title");
 		}
@@ -259,14 +269,14 @@ public class UserServiceImpl implements UserService {
 			}
 
 			// GENDER Validation and Mapping
-			Gender gender = userdto.getGender();
+			com.example.demo.enums.Gender gender = userdto.getGender();
 			if (gender == null) {
 				throw new IllegalArgumentException("Enter gender");
 			}
 			existingEntity.setGender(gender);
 
 			// Title
-			Title title = userdto.getTitle();
+			title title = userdto.getTitle();
 			if (title != null) {
 				existingEntity.setTitle(title);
 			}
@@ -456,48 +466,45 @@ public class UserServiceImpl implements UserService {
 		return map;
 	}
 
-//	@Override
-//	public String generateExcelFile() throws IOException{
-//		XSSFWorkbook workbook = new XSSFWorkbook();
-//		XSSFSheet sheet = workbook.createSheet("sample usersheet");
-//		XSSFRow row = sheet.createRow(0);
-//		
-//		row.createCell(0).setCellValue("userfullName");
-//		row.createCell(1).setCellValue("email");
-//		row.createCell(2).setCellValue("mobileNumber");
-//		row.createCell(3).setCellValue("alternatemobileno");
-//		row.createCell(4).setCellValue("annualincome");
-//		row.createCell(5).setCellValue("userstatus");
-//		row.createCell(6).setCellValue("pannumber");
-//		row.createCell(7).setCellValue("aadharnumber");
-//		row.createCell(8).setCellValue("gender");
-//		row.createCell(9).setCellValue("title");
-//		row.createCell(10).setCellValue("useraddress");
-//		row.createCell(11).setCellValue("useraddress1");
-//		row.createCell(12).setCellValue("useraddress2");
-//		row.createCell(13).setCellValue("useraddress3");
-//		row.createCell(14).setCellValue("userdob");
-//		row.createCell(15).setCellValue("usercity");
-//
-//		
-//	 
-//		
-//		
-//	String fileName="Sample_";
-//	String filePath="C:/SmpleGenerateFile/";
-//	
-//	String randomName=UUID.randomUUID().toString().substring(0,4);
-//	
-//	
-//	String fullFilePathString= filePath+fileName+randomName+".xlsx";
-//	
-//	FileOutputStream fOutputStream=new FileOutputStream(fullFilePathString);
-//	
-//	workbook.write(fOutputStream);
-//	workbook.close();
-//	
-//	return "Your File Downloaded on this Location:: "+fullFilePathString;
-//	
-//	}
+	@Override
+	public String generateExcelFile() throws IOException {
+		XSSFWorkbook workbook = new XSSFWorkbook();
+		XSSFSheet sheet = workbook.createSheet("sample usersheet");
+		XSSFRow row = sheet.createRow(0);
 
+		row.createCell(0).setCellValue("userfullName");
+		row.createCell(1).setCellValue("email");
+		row.createCell(2).setCellValue("mobileNumber");
+		row.createCell(3).setCellValue("alternatemobileno");
+		row.createCell(4).setCellValue("annualincome");
+		row.createCell(5).setCellValue("userstatus");
+		row.createCell(6).setCellValue("pannumber");
+		row.createCell(7).setCellValue("aadharnumber");
+		row.createCell(8).setCellValue("gender");
+		row.createCell(9).setCellValue("title");
+		row.createCell(10).setCellValue("useraddress");
+		row.createCell(11).setCellValue("useraddress1");
+		row.createCell(12).setCellValue("useraddress2");
+		row.createCell(13).setCellValue("useraddress3");
+		row.createCell(14).setCellValue("userdob");
+		row.createCell(15).setCellValue("usercity");
+
+		String fileName = "Sample_";
+		String filePath = "C:/SmpleGenerateFile/";
+
+		String randomName = UUID.randomUUID().toString().substring(0, 4);
+
+		String fullFilePathString = filePath + fileName + randomName + ".xlsx";
+
+		FileOutputStream fOutputStream = new FileOutputStream(fullFilePathString);
+
+		workbook.write(fOutputStream);
+		workbook.close();
+
+		return "Your File Downloaded on this Location:: " + fullFilePathString;
+
+	}
+
+	
+	
 }

@@ -1,5 +1,8 @@
+
+
 package com.example.demo.service;
 
+import java.io.IOException;
 import java.util.List;
 
 import com.example.demo.Pagination.UserPagination;
@@ -22,6 +25,6 @@ public interface UserService {
 
 	public List<?> findAllWithPagination(UserPagination pagination);
 	
-	//public String generateExcelFile() throws IOException;
+	public String generateExcelFile() throws IOException;
 
 }

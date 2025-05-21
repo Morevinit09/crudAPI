@@ -1,3 +1,6 @@
+
+
+
 package com.example.demo.serviceimpl;
 
 import java.util.ArrayList;
@@ -13,10 +16,13 @@ import com.example.demo.entity.Nominee;
 import com.example.demo.entity.Proposal;
 import com.example.demo.repository.NomineeRepository;
 import com.example.demo.repository.ProposalRepository;
+import com.example.demo.response.Response;
 import com.example.demo.service.ProposalService;
 
 @Service
 public class ProposalServiceImpl implements ProposalService {
+
+	private static final Response Response = null;
 
 	@Autowired
 	private ProposalRepository proposalRepository;
@@ -102,5 +108,68 @@ public class ProposalServiceImpl implements ProposalService {
 
 		return "Update Success!!";
 	}
+	
+	@Override
+	public Response updateNominee(Integer nomineeId, NomineeDto nomineeDto) {
+		Optional<Nominee> byNomineeIdAndStatus = nomineeRepository.findByNomineeIdAndStatus(nomineeId,'Y');
+		
+		if (byNomineeIdAndStatus.isPresent()) {
+			Nominee nominee = byNomineeIdAndStatus.get();
+			nominee.setNomineeName(nomineeDto.getNomineeName());
+			nominee.setNomineeDateOfBirth(nominee.getNomineeDateOfBirth());
+			nominee.setNomineeMobileNumber(nominee.getNomineeMobileNumber());
+			nominee.setNomineeAge(nominee.getNomineeAge());
+			
+			nomineeRepository.save(nominee);
+			
+		}
+		return Response; 
+		
+	}
+	
 
+	@Override
+	public List<ProposalDto> getAllProposalWithNominee() {
+
+		List<Proposal> mainEntity = proposalRepository.findAll();
+
+		List<ProposalDto> propssalDto = new ArrayList<>();
+
+		
+
+		for (Proposal proposal : mainEntity) {
+
+			ProposalDto dto = new ProposalDto();
+
+			dto.setProposalName(proposal.getProposalName());
+			dto.setProposalMobileNumber(proposal.getProposalMobileNumber());
+			dto.setProposalAge(proposal.getProposalAge());
+			dto.setProposalDateOfBirth(proposal.getProposalDateOfBirth());
+
+			List<Nominee> nominees = proposal.getNominees();
+			List<NomineeDto> nomineeDtos = new ArrayList<>();
+
+			for (Nominee nominee : nominees) {
+
+				NomineeDto nomineeDtoz = new NomineeDto();
+
+				nomineeDtoz.setNomineeName(nominee.getNomineeName());
+				nomineeDtoz.setNomineeDateOfBirth(nominee.getNomineeDateOfBirth());
+				nomineeDtoz.setNomineeAge(nominee.getNomineeAge());
+				nomineeDtoz.setNomineeMobileNumber(nominee.getNomineeMobileNumber());
+
+				nomineeDtos.add(nomineeDtoz);
+
+			}
+
+			dto.setNomineeDtos(nomineeDtos);
+
+			propssalDto.add(dto);
+		}
+
+		return propssalDto;
+	}
+
+	
 }
+

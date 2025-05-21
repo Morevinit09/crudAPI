@@ -1,8 +1,10 @@
 package com.example.demo.controller;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.dto.NomineeDto;
 import com.example.demo.dto.ProposalDto;
 import com.example.demo.entity.Proposal;
 import com.example.demo.response.Response;
@@ -75,6 +78,59 @@ public class ProposalController {
 			response.setData(updatepropsal);
 			response.setMessage("Success");
 			response.setStatus(true);
+
+		} catch (IllegalArgumentException e) {
+			response.setData(new ArrayList<>());
+			response.setMessage(e.getMessage());
+			response.setStatus(false);
+		} catch (Exception e) {
+			response.setData(new ArrayList<>());
+			response.setMessage("failed");
+			response.setStatus(false);
+		}
+
+		return response;
+
+	}
+
+	@GetMapping("/list-allproposal")
+	public Response getAllProposalWithNominee() {
+		Response response = new Response();
+
+		try {
+			List<ProposalDto> allProposalWithNominee = proposalService.getAllProposalWithNominee();
+
+			response.setData(allProposalWithNominee);
+			response.setMessage("Success");
+			response.setStatus(true);
+
+		} catch (IllegalArgumentException e) {
+			response.setData(new ArrayList<>());
+			response.setMessage(e.getMessage());
+			response.setStatus(false);
+		} catch (Exception e) {
+			response.setData(new ArrayList<>());
+			response.setMessage("failed");
+			response.setStatus(false);
+		}
+		return response;
+
+	
+	}
+	
+	@PutMapping("/nominee_update_byid/{nomineeId}")
+	public Response updateNominee(@PathVariable Integer nomineeId, @RequestBody NomineeDto nomineeDto) {
+		Response response = new Response();
+
+		try {
+
+			Response updateNominee = proposalService.updateNominee(nomineeId, nomineeDto);
+			response.setData(updateNominee);
+			response.setMessage("Success");
+			response.setStatus(true);
+			
+			
+			
 
 		} catch (IllegalArgumentException e) {
 			response.setData(new ArrayList<>());

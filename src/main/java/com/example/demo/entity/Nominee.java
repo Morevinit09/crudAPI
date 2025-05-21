@@ -22,7 +22,7 @@ public class Nominee {
 	private String nomineeName;
 	private Long nomineeMobileNumber;
 	private Integer nomineeAge;
-	private Character Status;
+	private Character status;
 	private Date nomineeDateOfBirth;
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = true)
@@ -71,11 +71,11 @@ public class Nominee {
 	}
 
 	public Character getStatus() {
-		return Status;
+		return status;
 	}
 
 	public void setStatus(Character status) {
-		Status = status;
+		status = status;
 	}
 
 	public Date getNomineeDateOfBirth() {

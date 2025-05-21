@@ -3,7 +3,7 @@ package com.example.demo.entity;
 import java.util.Date;
 
 import com.example.demo.enums.Gender;
-import com.example.demo.enums.Title;
+import com.example.demo.enums.title;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -73,7 +73,7 @@ public class UserEntity {
 	
 	@Column(name = "title")
 	@Enumerated(EnumType.STRING)
-	private Title title; 
+	private title title;
 	
 	
    
@@ -185,15 +185,17 @@ public class UserEntity {
 		this.gender = gender;
 	}
 
-	public Title getTitle() {
+	
+
+	
+	public com.example.demo.enums.title getTitle() {
 		return title;
 	}
 
-	public void setTitle(Title title) {
+	public void setTitle(com.example.demo.enums.title title) {
 		this.title = title;
 	}
 
-	
 	public Character getUserstatus() {
 		return userstatus;
 	}
