@@ -3,7 +3,7 @@ package com.example.demo.entity;
 import java.util.Date;
 
 import com.example.demo.enums.Gender;
-import com.example.demo.enums.title;
+import com.example.demo.enums.Title;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -50,10 +50,10 @@ public class UserEntity {
 	private String email;
 	
 	@Column(name = "user_mobile_number")
-	private String mobileNumber;
+	private Long mobileNumber;
 	
 	@Column(name = "user_alternatemobileno")
-	private String alternatemobileno;
+	private Long alternatemobileno;
 	
 	@Column(name = "user_annualincome")
 	private Long annualincome;
@@ -73,7 +73,7 @@ public class UserEntity {
 	
 	@Column(name = "title")
 	@Enumerated(EnumType.STRING)
-	private title title;
+	private Title title;
 	
 	
    
@@ -142,13 +142,7 @@ public class UserEntity {
 		this.userfullName = userfullName;
 	}
 
-	public String getAlternatemobileno() {
-		return alternatemobileno;
-	}
-
-	public void setAlternatemobileno(String alternatemobileno) {
-		this.alternatemobileno = alternatemobileno;
-	}
+	
 
 	public Long getAnnualincome() {
 		return annualincome;
@@ -188,11 +182,11 @@ public class UserEntity {
 	
 
 	
-	public com.example.demo.enums.title getTitle() {
+	public com.example.demo.enums.Title getTitle() {
 		return title;
 	}
 
-	public void setTitle(com.example.demo.enums.title title) {
+	public void setTitle(com.example.demo.enums.Title title) {
 		this.title = title;
 	}
 
@@ -204,12 +198,22 @@ public class UserEntity {
 		this.userstatus = userstatus;
 	}
 
-	public String getMobileNumber() {
+	
+	public Long getMobileNumber() {
 		return mobileNumber;
 	}
 
-	public void setMobileNumber(String mobileNumber) {
+	public void setMobileNumber(Long mobileNumber) {
 		this.mobileNumber = mobileNumber;
+	}
+
+	public Long getAlternatemobileno() {
+		return alternatemobileno;
+	}
+
+	
+	public void setAlternatemobileno(Long alternatemobileno) {
+		this.alternatemobileno = alternatemobileno;
 	}
 
 	public Long getUserId() {

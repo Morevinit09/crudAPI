@@ -1,9 +1,11 @@
 package com.example.demo.controller;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -11,7 +13,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.Pagination.UserPagination;
 import com.example.demo.dto.UserDto;
@@ -155,31 +159,57 @@ public class UserController {
 
 	}
 
-//	@GetMapping("/download_Sample_excel")
-//	public Response generateSampleExcellSheet()
-//	{
-//		Response response=new Response();
-//		
-//		try {
-//			
-//		String msg=	serviceImpl.generateExcelFile();
-//			
-//			response.setData(msg);
-//			response.setMessage("Success");
-//			response.setStatus(true);
-//			response.setTotalRecords(0);
-//			
-//			
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//			
-//			response.setData(new ArrayList<>());
-//			response.setMessage("Failed");
-//			response.setStatus(false);
-//			response.setTotalRecords(0);
-//		}
-//		
-//		return response;
-//	}
+	@GetMapping("/generate/excel")
+	public Response generateSampleExcellSheet()
+	{
+		Response response=new Response();
+		
+		try {
+			
+		String msg=	serviceImpl.generateExcelFile();
+			
+			response.setData(msg);
+			response.setMessage("Success");
+			response.setStatus(true);
+			response.setTotalRecords(null);
+			
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+			
+			response.setData(new ArrayList<>());
+			response.setMessage("Failed");
+			response.setStatus(false);
+			response.setTotalRecords(0);
+		}
+		
+		return response;
+	}
+	
+	
+	@PostMapping(value = "/uploadexcel", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public Response uploadExcelFile(@RequestParam("file") MultipartFile file) {
+		
+		Response response = new Response();
+		
+		try {
+			String saveDataFromExcelFile = serviceImpl.saveDataFromExcelFile(file);
+			response.setStatus(true);
+			response.setMessage("Excel data saved successfully");
+			response.setData(saveDataFromExcelFile);
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+			response.setStatus(false);
+			response.setMessage(e.getMessage());
+			response.setData(null);
+		} 
+		catch (Exception e) {
+			e.printStackTrace();
+			response.setStatus(false);
+			response.setMessage("Failed to upload Excel: ");
+			response.setData(null);
+		}
+		return response;
+	}
 
 }

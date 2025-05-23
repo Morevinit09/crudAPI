@@ -3,7 +3,7 @@ package com.example.demo.dto;
 import java.util.Date;
 
 import com.example.demo.enums.Gender;
-import com.example.demo.enums.title;
+import com.example.demo.enums.Title;
 
 
 public class UserDto {
@@ -26,11 +26,11 @@ public class UserDto {
 
 	private String email;
 
-	private String mobileNumber;
+	private Long mobileNumber;
 
 	private Gender gender;
 
-	private title title;
+	private Title title;
 	
 	
 	public String getUseraddress() {
@@ -69,15 +69,15 @@ public class UserDto {
 		this.gender = gender;
 	}
 
-	public String getAlternatemobileno() {
+	public Long getAlternatemobileno() {
 		return alternatemobileno;
 	}
 
-	public void setAlternatemobileno(String alternatemobileno) {
+	public void setAlternatemobileno(Long alternatemobileno) {
 		this.alternatemobileno = alternatemobileno;
 	}
 
-	private String alternatemobileno;
+	private Long alternatemobileno;
 
 	private Long annualincome;
 
@@ -142,11 +142,12 @@ public class UserDto {
 		this.email = email;
 	}
 
-	public String getMobileNumber() {
+	public Long getMobileNumber() {
 		return mobileNumber;
 	}
 
-	public void setMobileNumber(String mobileNumber) {
+	
+	public void setMobileNumber(Long mobileNumber) {
 		this.mobileNumber = mobileNumber;
 	}
 
@@ -162,11 +163,11 @@ public class UserDto {
 		return gender;
 	}
 
-	public com.example.demo.enums.title getTitle() {
+	public com.example.demo.enums.Title getTitle() {
 		return title;
 	}
 
-	public void setTitle(com.example.demo.enums.title title) {
+	public void setTitle(com.example.demo.enums.Title title) {
 		this.title = title;
 	}
 

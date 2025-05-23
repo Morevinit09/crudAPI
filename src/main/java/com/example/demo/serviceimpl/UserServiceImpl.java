@@ -1,7 +1,4 @@
 
-
-
-
 package com.example.demo.serviceimpl;
 
 import java.io.FileOutputStream;
@@ -15,6 +12,10 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -25,8 +26,11 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.demo.Pagination.SearchFilter;
 import com.example.demo.Pagination.UserPagination;
 import com.example.demo.dto.UserDto;
+import com.example.demo.entity.ErrorTable;
 import com.example.demo.entity.UserEntity;
-import com.example.demo.enums.title;
+import com.example.demo.enums.Gender;
+import com.example.demo.enums.Title;
+import com.example.demo.repository.ErrorTableRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.UserService;
 
@@ -41,11 +45,13 @@ import jakarta.persistence.criteria.Root;
 public class UserServiceImpl implements UserService {
 
 	@Autowired
-
 	private UserRepository repository;
 
-//	@Autowired
-//	private UserEntity entity;
+	@Autowired
+	private ErrorTableRepository errorTableRepository;
+
+	// @Autowired
+	// private UserEntity entity;
 
 	@Autowired
 	private EntityManager entityManager;
@@ -70,11 +76,11 @@ public class UserServiceImpl implements UserService {
 		entity.setEmail(email);
 
 		// Mobile Number Validation and Mapping
-//		String mobileNo = userdto.getMobileNumber();
-//		if (mobileNo == null ) {
-//			throw new IllegalArgumentException("Please enter valid mobile number");
-//		}
-//		entity.setMobileNumber(mobileNo);
+		// String mobileNo = userdto.getMobileNumber();
+		// if (mobileNo == null ) {
+		// throw new IllegalArgumentException("Please enter valid mobile number");
+		// }
+		// entity.setMobileNumber(mobileNo);
 
 		// Annual Income Validation and Mapping
 		Long annualIncome = userdto.getAnnualincome();
@@ -83,9 +89,9 @@ public class UserServiceImpl implements UserService {
 
 		// User Address Mapping
 		String userAddress = userdto.getUseraddress();
-//		if (userAddress == null) {
-//			throw new IllegalArgumentException("Please enter a valid address");
-//		}
+		// if (userAddress == null) {
+		// throw new IllegalArgumentException("Please enter a valid address");
+		// }
 		entity.setUserAddress(userAddress);
 
 		// Address Line 1 Mapping
@@ -102,9 +108,9 @@ public class UserServiceImpl implements UserService {
 
 		// City Validation and Mapping
 		String city = userdto.getUserCity();
-//		if (city == null || !city.isEmpty()) {
-//			throw new IllegalArgumentException("Enter City");
-//		}
+		// if (city == null || !city.isEmpty()) {
+		// throw new IllegalArgumentException("Enter City");
+		// }
 		entity.setUsercity(city);
 
 		// PAN Number Validation and Mapping
@@ -122,26 +128,26 @@ public class UserServiceImpl implements UserService {
 		}
 		entity.setAadharnumber(aadharNo);
 
-		String mobileno = userdto.getMobileNumber();
-		if (mobileno != null && !mobileno.isEmpty()) {
+		Long mobileno = userdto.getMobileNumber();
+		if (mobileno != null && !mobileno.toString().isEmpty()) {
 			entity.setMobileNumber(mobileno);
 		}
 
 		// Alternate Mobile Number Mapping
-		String alternatemobileno = userdto.getAlternatemobileno();
-		if (alternatemobileno != null && !alternatemobileno.isEmpty()) {
+		Long alternatemobileno = userdto.getAlternatemobileno();
+		if (alternatemobileno != null && !alternatemobileno.toString().isEmpty()) {
 			entity.setAlternatemobileno(alternatemobileno);
 		}
 
-//GENDER Validation and Mapping 
-	  com.example.demo.enums.Gender gender = userdto.getGender();
+		// GENDER Validation and Mapping
+		com.example.demo.enums.Gender gender = userdto.getGender();
 		if (gender == null) {
 			throw new IllegalArgumentException("Enter gender");
 		}
 		entity.setGender(gender);
 
 		// Title Validation and Mapping
-		title title = userdto.getTitle();
+		Title title = userdto.getTitle();
 		if (title == null) {
 			throw new IllegalArgumentException("Enter title");
 		}
@@ -156,9 +162,9 @@ public class UserServiceImpl implements UserService {
 
 		// State Validation and Mapping
 		String state = userdto.getUserState();
-//	    if (state == null || state.isEmpty()) {
-//	        throw new IllegalArgumentException("Enter State");
-//	    }
+		// if (state == null || state.isEmpty()) {
+		// throw new IllegalArgumentException("Enter State");
+		// }
 		entity.setUserstate(state);
 		entity.setUserstatus('Y');
 
@@ -193,10 +199,10 @@ public class UserServiceImpl implements UserService {
 			}
 
 			// Mobile Number
-			String mobileNumber = userdto.getMobileNumber();
+			String mobileNumber = userdto.getMobileNumber().toString();
 			if (mobileNumber != null) {
 				if (mobileNumber.matches("^[6-9]\\d{9}$")) {
-					existingEntity.setMobileNumber(mobileNumber);
+					existingEntity.setMobileNumber(userdto.getMobileNumber());
 				} else {
 					throw new IllegalArgumentException("Invalid mobile number format");
 				}
@@ -218,7 +224,7 @@ public class UserServiceImpl implements UserService {
 				existingEntity.setUserAddress(useraddress);
 			}
 
-//	         Address lines
+			// Address lines
 			String useraddress1 = userdto.getUseraddress1();
 			if (userdto.getUseraddress1() != null) {
 				existingEntity.setUseraddress1(useraddress1);
@@ -248,21 +254,21 @@ public class UserServiceImpl implements UserService {
 				}
 			}
 
-//	        // Aadhar
-//	        String aadharNumber = userdto.getAadharNumber();
-//	        if (aadharNumber != null) {
-//	            if (aadharNumber.matches("^[2-9]{1}[0-9]{11}$")) {
-//	                existingEntity.setAadharnumber(aadharNumber);
-//	            } else {
-//	                throw new IllegalArgumentException("Invalid Aadhar number");
-//	            }
-//	        }
+			// // Aadhar
+			// String aadharNumber = userdto.getAadharNumber();
+			// if (aadharNumber != null) {
+			// if (aadharNumber.matches("^[2-9]{1}[0-9]{11}$")) {
+			// existingEntity.setAadharnumber(aadharNumber);
+			// } else {
+			// throw new IllegalArgumentException("Invalid Aadhar number");
+			// }
+			// }
 
 			// Alternate Mobile
-			String altMobile = userdto.getAlternatemobileno();
+			String altMobile = userdto.getAlternatemobileno().toString();
 			if (altMobile != null) {
 				if (altMobile.matches("^[6-9]\\d{9}$")) {
-					existingEntity.setAlternatemobileno(altMobile);
+					existingEntity.setAlternatemobileno(userdto.getAlternatemobileno());
 				} else {
 					throw new IllegalArgumentException("Invalid alternate mobile number");
 				}
@@ -276,7 +282,7 @@ public class UserServiceImpl implements UserService {
 			existingEntity.setGender(gender);
 
 			// Title
-			title title = userdto.getTitle();
+			Title title = userdto.getTitle();
 			if (title != null) {
 				existingEntity.setTitle(title);
 			}
@@ -333,8 +339,8 @@ public class UserServiceImpl implements UserService {
 			dto.setUserFullName(details.getUserfullName());
 			dto.setUseraddress(details.getUseraddress());
 			dto.setUseraddress1(details.getUseraddress1());
-//	        dto.setUseraddress2(details.getUseraddress2());
-//	        dto.setUseraddress3(details.getUseraddress3());
+			// dto.setUseraddress2(details.getUseraddress2());
+			// dto.setUseraddress3(details.getUseraddress3());
 			dto.setAlternatemobileno(details.getAlternatemobileno());
 			dto.setUserCity(details.getUsercity());
 			dto.setEmail(details.getEmail());
@@ -344,7 +350,7 @@ public class UserServiceImpl implements UserService {
 			dto.setUserDob(details.getUserDob());
 			// dto.setAadharNumber(details.getAadharnumber());
 			dto.setPannumber(details.getPannumber());
-//	        dto.setUserstatus(details.getUserstatus());
+			// dto.setUserstatus(details.getUserstatus());
 			dto.setAnnualincome(details.getAnnualincome());
 			dto.setTitle(details.getTitle());
 		}
@@ -477,17 +483,17 @@ public class UserServiceImpl implements UserService {
 		row.createCell(2).setCellValue("mobileNumber");
 		row.createCell(3).setCellValue("alternatemobileno");
 		row.createCell(4).setCellValue("annualincome");
-		row.createCell(5).setCellValue("userstatus");
-		row.createCell(6).setCellValue("pannumber");
-		row.createCell(7).setCellValue("aadharnumber");
-		row.createCell(8).setCellValue("gender");
-		row.createCell(9).setCellValue("title");
-		row.createCell(10).setCellValue("useraddress");
-		row.createCell(11).setCellValue("useraddress1");
-		row.createCell(12).setCellValue("useraddress2");
-		row.createCell(13).setCellValue("useraddress3");
-		row.createCell(14).setCellValue("userdob");
-		row.createCell(15).setCellValue("usercity");
+		row.createCell(5).setCellValue("pannumber");
+		row.createCell(6).setCellValue("aadharnumber");
+		row.createCell(7).setCellValue("gender");
+		row.createCell(8).setCellValue("title");
+		row.createCell(9).setCellValue("useraddress");
+		row.createCell(10).setCellValue("useraddress1");
+		row.createCell(11).setCellValue("useraddress2");
+		row.createCell(12).setCellValue("useraddress3");
+		row.createCell(13).setCellValue("userdob");
+		row.createCell(14).setCellValue("usercity");
+		row.createCell(15).setCellValue("userstate");
 
 		String fileName = "Sample_";
 		String filePath = "C:/SmpleGenerateFile/";
@@ -505,6 +511,146 @@ public class UserServiceImpl implements UserService {
 
 	}
 
-	
-	
+	@Override
+	public String saveDataFromExcelFile(MultipartFile file) throws IOException {
+	    UserEntity users = new UserEntity();
+	    XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream());
+	    XSSFSheet sheet = workbook.getSheetAt(0);
+
+	    for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+	        XSSFRow row = sheet.getRow(i);
+	        List<String> errorList = new ArrayList<>();
+	       
+	        UserEntity user = new UserEntity();
+
+	        String fullName = getStringCellValue(row, 0);
+	        if (fullName.isEmpty()) errorList.add("UserfullName: is Empty");
+	        else user.setUserfullName(fullName);
+
+	        String email = getStringCellValue(row, 1);
+	        if (email.isEmpty()) errorList.add("Email: is Empty");
+	        else user.setEmail(email);
+
+	        String mobileStr = getStringCellValue(row, 2);
+	        if (mobileStr.isEmpty()) errorList.add("MobileNumber: is Empty");
+	        else {
+	            try {
+	                user.setMobileNumber(Long.parseLong(mobileStr));
+	            } catch (NumberFormatException e) {
+	                errorList.add("MobileNumber: Invalid format");
+	            }
+	        }
+
+	        String altMobileStr = getStringCellValue(row, 3);
+	        if (altMobileStr.isEmpty()) errorList.add("AlternateMobile: is Empty");
+	        else {
+	            try {
+	                user.setAlternatemobileno(Long.parseLong(altMobileStr));
+	            } catch (NumberFormatException e) {
+	                errorList.add("AlternateMobile: Invalid format");
+	            }
+	        }
+
+	        String incomeStr = getStringCellValue(row, 4);
+	        if (incomeStr.isEmpty()) errorList.add("AnnualIncome: is Empty");
+	        else {
+	            try {
+	                user.setAnnualincome(Long.parseLong(incomeStr));
+	            } catch (NumberFormatException e) {
+	                errorList.add("AnnualIncome: Invalid format");
+	            }
+	        }
+
+	        String pan = getStringCellValue(row, 5);
+	        if (pan.isEmpty()) errorList.add("Pannumber: is Empty");
+	        else user.setPannumber(pan);
+
+	        String aadharStr = getStringCellValue(row, 6);
+	        if (aadharStr.isEmpty()) errorList.add("AadharNumber: is Empty");
+	        else user.setAadharnumber(aadharStr);
+
+	        String genderStr = getStringCellValue(row, 7).toUpperCase();
+	        try {
+	            user.setGender(Gender.valueOf(genderStr));
+	        } catch (Exception e) {
+	            errorList.add("Gender: Invalid or Empty");
+	        }
+
+	        String titleStr = getStringCellValue(row, 8).toUpperCase();
+	        try {
+	            user.setTitle(Title.valueOf(titleStr));
+	        } catch (Exception e) {
+	            errorList.add("Title: Invalid or Empty");
+	        }
+
+	        // Addresses
+	        user.setUseraddress(getStringCellValue(row, 9));
+	        if (user.getUseraddress().isEmpty()) errorList.add("Address: is Empty");
+
+	        user.setUseraddress1(getStringCellValue(row, 10));
+	        if (user.getUseraddress1().isEmpty()) errorList.add("Address1: is Empty");
+
+	        user.setUseraddress2(getStringCellValue(row, 11));
+	        if (user.getUseraddress2().isEmpty()) errorList.add("Address2: is Empty");
+
+	        user.setUseraddress3(getStringCellValue(row, 12));
+	        if (user.getUseraddress3().isEmpty()) errorList.add("Address3: is Empty");
+
+	        if (row.getCell(13) != null && DateUtil.isCellDateFormatted(row.getCell(13))) {
+	            user.setUserdob(row.getCell(13).getDateCellValue());
+	        } else {
+	            errorList.add("UserDob: is Empty or Invalid");
+	        }
+
+	        user.setUsercity(getStringCellValue(row, 14));
+	        if (user.getUsercity().isEmpty()) errorList.add("City: is Empty");
+
+	        user.setUserstate(getStringCellValue(row, 15));
+	        if (user.getUserstate().isEmpty()) errorList.add("State: is Empty");
+
+	        // Save errors or user
+	        if (!errorList.isEmpty()) {
+	        	int k = 0;
+	        	for (String eros : errorList) {
+	        	    ErrorTable error = new ErrorTable();
+	        	    String[] parts = eros.split(":", 2);
+	        	    error.setErrorField(parts.length > 0 ? parts[0].trim() : "Unknown");
+	        	    error.setErrorMessage(eros.trim());
+	        	    error.setErrorStatus('F');
+	        	    error.setErrorRow("Row" + i);
+	        	    errorTableRepository.save(error);
+	        	}
+	        	
+	        	} else {
+	        		  UserEntity saveAll = repository.save(users);
+	           
+	            
+	            System.out.println("userId"+ saveAll.getUserId());
+	            ErrorTable error = new ErrorTable();
+//        	    error.setErrorField(""+saveAll.getUserId());
+//        	    error.setErrorMessage(""+saveAll.getUserId());
+	            error.setErrorField("N/A");
+        	    error.setErrorMessage("N/A"
+        	    		+ ""
+        	    		+ "");
+        	    error.setErrorStatus('S');
+        	    error.setErrorRow("Row" + i);
+        	    errorTableRepository.save(error);
+        	
+	        }
+	    }
+
+	  
+	    workbook.close();
+
+	    return "User Added Successfully !!!!";
+	}
+
+	private String getStringCellValue(Row row, int cellIndex) {
+	    Cell cell = row.getCell(cellIndex);
+	    if (cell == null) return "";
+	    if (cell.getCellType() == CellType.STRING) return cell.getStringCellValue().trim();
+	    if (cell.getCellType() == CellType.NUMERIC) return String.valueOf((long) cell.getNumericCellValue());
+	    return "";
+	}
 }

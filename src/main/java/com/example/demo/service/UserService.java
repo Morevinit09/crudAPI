@@ -1,9 +1,10 @@
 
-
 package com.example.demo.service;
 
 import java.io.IOException;
 import java.util.List;
+
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.Pagination.UserPagination;
 import com.example.demo.dto.UserDto;
@@ -24,7 +25,9 @@ public interface UserService {
 	public UserDto userFindById(Long userId);
 
 	public List<?> findAllWithPagination(UserPagination pagination);
-	
+
 	public String generateExcelFile() throws IOException;
+
+	public String saveDataFromExcelFile(MultipartFile file) throws IOException;
 
 }
