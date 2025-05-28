@@ -1,8 +1,10 @@
 
 package com.example.demo.serviceimpl;
 
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -20,6 +22,7 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,10 +30,12 @@ import com.example.demo.Pagination.SearchFilter;
 import com.example.demo.Pagination.UserPagination;
 import com.example.demo.dto.UserDto;
 import com.example.demo.entity.ErrorTable;
+import com.example.demo.entity.QueuTable;
 import com.example.demo.entity.UserEntity;
 import com.example.demo.enums.Gender;
 import com.example.demo.enums.Title;
 import com.example.demo.repository.ErrorTableRepository;
+import com.example.demo.repository.QueuRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.UserService;
 
@@ -46,6 +51,8 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private UserRepository repository;
+	@Autowired
+	private QueuRepository queuRepository;
 
 	@Autowired
 	private ErrorTableRepository errorTableRepository;
@@ -55,6 +62,11 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private EntityManager entityManager;
+
+	/*
+	 * private QueuTable queuTable; private Row headerRow2; private List<UserEntity>
+	 * errorsFields; private String status;
+	 */
 
 	@Override
 	public String addUserInfo(UserDto userdto) {
@@ -175,6 +187,8 @@ public class UserServiceImpl implements UserService {
 		return "User Added Successfully";
 	}
 
+//	=================================================================================================================================
+
 	@Override
 	public String update(Long userId, UserDto userdto) {
 		Optional<UserEntity> optionalUser = repository.findById(userId);
@@ -254,7 +268,6 @@ public class UserServiceImpl implements UserService {
 				}
 			}
 
-			// // Aadhar
 			// String aadharNumber = userdto.getAadharNumber();
 			// if (aadharNumber != null) {
 			// if (aadharNumber.matches("^[2-9]{1}[0-9]{11}$")) {
@@ -359,6 +372,8 @@ public class UserServiceImpl implements UserService {
 
 	}
 
+//	========================================================================================================================
+
 	@Override
 	public List<Map<String, Object>> findAllWithPagination(UserPagination pagination) {
 		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -452,26 +467,27 @@ public class UserServiceImpl implements UserService {
 
 		Map<String, Object> map = new HashMap<>();
 		map.put("userId", userEntity.getUserId());
-		map.put("userdob", userEntity.getUserdob());
-		map.put("useraddress", userEntity.getUseraddress());
-		map.put("useraddress1", userEntity.getUseraddress1());
-		map.put("useraddress2", userEntity.getUseraddress2());
-		map.put("useraddress3", userEntity.getUseraddress3());
-		map.put("usercity", userEntity.getUsercity());
-		map.put("userstate", userEntity.getUserstate());
 		map.put("userfullName", userEntity.getUserfullName());
 		map.put("email", userEntity.getEmail());
 		map.put("mobileNumber", userEntity.getMobileNumber());
 		map.put("alternatemobileno", userEntity.getAlternatemobileno());
 		map.put("annualincome", userEntity.getAnnualincome());
-		map.put("userstatus", userEntity.getUserstatus());
 		map.put("pannumber", userEntity.getPannumber());
 		map.put("aadharnumber", userEntity.getAadharnumber());
 		map.put("gender", userEntity.getGender());
 		map.put("title", userEntity.getTitle());
+		map.put("useraddress", userEntity.getUseraddress());
+		map.put("useraddress1", userEntity.getUseraddress1());
+		map.put("useraddress2", userEntity.getUseraddress2());
+		map.put("useraddress3", userEntity.getUseraddress3());
+		map.put("userdob", userEntity.getUserdob());
+		map.put("usercity", userEntity.getUsercity());
+		map.put("userstate", userEntity.getUserstate());
+		map.put("userstatus", userEntity.getUserstatus());
 		return map;
 	}
 
+//===================================================================================================================================
 	@Override
 	public String generateExcelFile() throws IOException {
 		XSSFWorkbook workbook = new XSSFWorkbook();
@@ -510,147 +526,634 @@ public class UserServiceImpl implements UserService {
 		return "Your File Downloaded on this Location:: " + fullFilePathString;
 
 	}
+//	==============================================================Import Export Excel =======================================================================================
 
 	@Override
 	public String saveDataFromExcelFile(MultipartFile file) throws IOException {
-	    UserEntity users = new UserEntity();
 	    XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream());
 	    XSSFSheet sheet = workbook.getSheetAt(0);
 
+	    Row headerRow = sheet.getRow(0);
+	    int lastCol = headerRow.getLastCellNum();
+	    headerRow.createCell(lastCol).setCellValue("Error Message");
+	    headerRow.createCell(lastCol + 1).setCellValue("Error Status");
+
 	    for (int i = 1; i <= sheet.getLastRowNum(); i++) {
 	        XSSFRow row = sheet.getRow(i);
+	        if (row == null) continue;
+
 	        List<String> errorList = new ArrayList<>();
-	       
+	        List<String> errorFiled = new ArrayList<>();
 	        UserEntity user = new UserEntity();
 
-	        String fullName = getStringCellValue(row, 0);
-	        if (fullName.isEmpty()) errorList.add("UserfullName: is Empty");
-	        else user.setUserfullName(fullName);
-
-	        String email = getStringCellValue(row, 1);
-	        if (email.isEmpty()) errorList.add("Email: is Empty");
-	        else user.setEmail(email);
-
-	        String mobileStr = getStringCellValue(row, 2);
-	        if (mobileStr.isEmpty()) errorList.add("MobileNumber: is Empty");
-	        else {
-	            try {
-	                user.setMobileNumber(Long.parseLong(mobileStr));
-	            } catch (NumberFormatException e) {
-	                errorList.add("MobileNumber: Invalid format");
-	            }
+	        if (row.getCell(0) == null || row.getCell(0).getStringCellValue().isEmpty()) {
+	            errorList.add("UserFullName is Empty");
+	            errorFiled.add("UserFullName");
 	        }
 
-	        String altMobileStr = getStringCellValue(row, 3);
-	        if (altMobileStr.isEmpty()) errorList.add("AlternateMobile: is Empty");
-	        else {
-	            try {
-	                user.setAlternatemobileno(Long.parseLong(altMobileStr));
-	            } catch (NumberFormatException e) {
-	                errorList.add("AlternateMobile: Invalid format");
-	            }
+	        if (row.getCell(1) == null || row.getCell(1).getStringCellValue().isEmpty()) {
+	            errorList.add("Email is Empty");
+	            errorFiled.add("Email");
 	        }
 
-	        String incomeStr = getStringCellValue(row, 4);
-	        if (incomeStr.isEmpty()) errorList.add("AnnualIncome: is Empty");
-	        else {
-	            try {
-	                user.setAnnualincome(Long.parseLong(incomeStr));
-	            } catch (NumberFormatException e) {
-	                errorList.add("AnnualIncome: Invalid format");
-	            }
+	        if (row.getCell(2) == null || row.getCell(2).getCellType() != CellType.NUMERIC) {
+	            errorList.add("Mobile number is empty or invalid");
+	            errorFiled.add("Mobile");
 	        }
 
-	        String pan = getStringCellValue(row, 5);
-	        if (pan.isEmpty()) errorList.add("Pannumber: is Empty");
-	        else user.setPannumber(pan);
+	        if (row.getCell(3) == null || row.getCell(3).getCellType() != CellType.NUMERIC) {
+	            errorList.add("Alternate Mobile Number is empty or invalid");
+	            errorFiled.add("Alternate Mobile Number");
+	        }
 
-	        String aadharStr = getStringCellValue(row, 6);
-	        if (aadharStr.isEmpty()) errorList.add("AadharNumber: is Empty");
-	        else user.setAadharnumber(aadharStr);
+	        if (row.getCell(4) == null || row.getCell(4).getCellType() != CellType.NUMERIC) {
+	            errorList.add("AnnualIncome is Empty");
+	            errorFiled.add("Annual Income");
+	        }
 
-	        String genderStr = getStringCellValue(row, 7).toUpperCase();
+	        if (row.getCell(5) == null || row.getCell(5).getStringCellValue().isEmpty()
+	                || !row.getCell(5).getStringCellValue().matches("[A-Z]{5}[0-9]{4}[A-Z]{1}")) {
+	            errorList.add("Pannumber is Empty or Invalid Format");
+	            errorFiled.add("Pannumber");
+	        }
+
+	        if (row.getCell(6) == null || row.getCell(6).getCellType() != CellType.NUMERIC) {
+	            errorList.add("Aadhaarnumber is Empty or Invalid");
+	            errorFiled.add("Aadhaarnumber");
+	        }
+
 	        try {
-	            user.setGender(Gender.valueOf(genderStr));
+	            if (row.getCell(7) == null || Gender.valueOf(row.getCell(7).getStringCellValue()) == null) {
+	                errorList.add("Invalid or Empty Gender");
+	                errorFiled.add("Gender");
+	            }
 	        } catch (Exception e) {
-	            errorList.add("Gender: Invalid or Empty");
+	            errorList.add("Invalid or Empty Gender");
+	            errorFiled.add("Gender");
 	        }
 
-	        String titleStr = getStringCellValue(row, 8).toUpperCase();
 	        try {
-	            user.setTitle(Title.valueOf(titleStr));
+	            if (row.getCell(8) == null || Title.valueOf(row.getCell(8).getStringCellValue()) == null) {
+	                errorList.add("Invalid or Empty Title");
+	                errorFiled.add("Title");
+	            }
 	        } catch (Exception e) {
-	            errorList.add("Title: Invalid or Empty");
+	            errorList.add("Invalid or Empty Title");
+	            errorFiled.add("Title");
 	        }
 
-	        // Addresses
-	        user.setUseraddress(getStringCellValue(row, 9));
-	        if (user.getUseraddress().isEmpty()) errorList.add("Address: is Empty");
-
-	        user.setUseraddress1(getStringCellValue(row, 10));
-	        if (user.getUseraddress1().isEmpty()) errorList.add("Address1: is Empty");
-
-	        user.setUseraddress2(getStringCellValue(row, 11));
-	        if (user.getUseraddress2().isEmpty()) errorList.add("Address2: is Empty");
-
-	        user.setUseraddress3(getStringCellValue(row, 12));
-	        if (user.getUseraddress3().isEmpty()) errorList.add("Address3: is Empty");
-
-	        if (row.getCell(13) != null && DateUtil.isCellDateFormatted(row.getCell(13))) {
-	            user.setUserdob(row.getCell(13).getDateCellValue());
-	        } else {
-	            errorList.add("UserDob: is Empty or Invalid");
+	        if (row.getCell(9) == null || row.getCell(9).getStringCellValue().isEmpty()) {
+	            errorList.add("Address is Empty");
+	            errorFiled.add("Address");
 	        }
 
-	        user.setUsercity(getStringCellValue(row, 14));
-	        if (user.getUsercity().isEmpty()) errorList.add("City: is Empty");
+	        if (row.getCell(10) == null || row.getCell(10).getStringCellValue().isEmpty()) {
+	            errorList.add("Address1 is Empty");
+	            errorFiled.add("Address1");
+	        }
 
-	        user.setUserstate(getStringCellValue(row, 15));
-	        if (user.getUserstate().isEmpty()) errorList.add("State: is Empty");
+	        if (row.getCell(11) == null || row.getCell(11).getStringCellValue().isEmpty()) {
+	            errorList.add("Address2 is Empty");
+	            errorFiled.add("Address2");
+	        }
 
-	        // Save errors or user
+	        if (row.getCell(12) == null || row.getCell(12).getStringCellValue().isEmpty()) {
+	            errorList.add("Address3 is Empty");
+	            errorFiled.add("Address3");
+	        }
+
+	        if (row.getCell(13) == null || row.getCell(13).getCellType() != CellType.NUMERIC) {
+	            errorList.add("Dob is Empty or Invalid");
+	            errorFiled.add("Dob");
+	        }
+
+	        if (row.getCell(14) == null || row.getCell(14).getStringCellValue().isEmpty()) {
+	            errorList.add("City is Empty");
+	            errorFiled.add("City");
+	        }
+
+	        if (row.getCell(15) == null || row.getCell(15).getStringCellValue().isEmpty()) {
+	            errorList.add("State is Empty");
+	            errorFiled.add("State");
+	        }
+
+	        if (row.getCell(16) == null || row.getCell(16).getStringCellValue().isEmpty()) {
+	            errorList.add("Status is Empty");
+	            errorFiled.add("Status");
+	        }
+
 	        if (!errorList.isEmpty()) {
-	        	int k = 0;
-	        	for (String eros : errorList) {
-	        	    ErrorTable error = new ErrorTable();
-	        	    String[] parts = eros.split(":", 2);
-	        	    error.setErrorField(parts.length > 0 ? parts[0].trim() : "Unknown");
-	        	    error.setErrorMessage(eros.trim());
-	        	    error.setErrorStatus('F');
-	        	    error.setErrorRow("Row" + i);
-	        	    errorTableRepository.save(error);
-	        	}
-	        	
-	        	} else {
-	        		  UserEntity saveAll = repository.save(users);
-	           
-	            
-	            System.out.println("userId"+ saveAll.getUserId());
-	            ErrorTable error = new ErrorTable();
-//        	    error.setErrorField(""+saveAll.getUserId());
-//        	    error.setErrorMessage(""+saveAll.getUserId());
-	            error.setErrorField("N/A");
-        	    error.setErrorMessage("N/A"
-        	    		+ ""
-        	    		+ "");
-        	    error.setErrorStatus('S');
-        	    error.setErrorRow("Row" + i);
-        	    errorTableRepository.save(error);
-        	
+	            for (int k = 0; k < errorList.size(); k++) {
+	                ErrorTable errorTable = new ErrorTable();
+	                errorTable.setErrorMessage(errorList.get(k));
+	                errorTable.setErrorField(errorFiled.get(k));
+	                errorTable.setErrorStatus('F');
+	                errorTable.setErrorRow("Row " + i);
+	                errorTableRepository.save(errorTable);
+	            }
+
+	            row.createCell(lastCol).setCellValue(String.join(", ", errorList));
+	            row.createCell(lastCol + 1).setCellValue("Failed");
+	        } else {
+	            user.setUserfullName(row.getCell(0).getStringCellValue());
+	            user.setEmail(row.getCell(1).getStringCellValue());
+	            user.setMobileNumber((long) row.getCell(2).getNumericCellValue());
+	            user.setAlternatemobileno((long) row.getCell(3).getNumericCellValue());
+	            user.setAnnualincome((long) row.getCell(4).getNumericCellValue());
+	            user.setPannumber(row.getCell(5).getStringCellValue());
+	            user.setAadharnumber(String.valueOf((long) row.getCell(6).getNumericCellValue()));
+	            user.setGender(Gender.valueOf(row.getCell(7).getStringCellValue()));
+	            user.setTitle(Title.valueOf(row.getCell(8).getStringCellValue()));
+	            user.setUserAddress(row.getCell(9).getStringCellValue());
+	            user.setUseraddress1(row.getCell(10).getStringCellValue());
+	            user.setUseraddress2(row.getCell(11).getStringCellValue());
+	            user.setUseraddress3(row.getCell(12).getStringCellValue());
+	            user.setUserDob(row.getCell(13).getDateCellValue());
+	            user.setUsercity(row.getCell(14).getStringCellValue());
+	            user.setUserstate(row.getCell(15).getStringCellValue());
+	            user.setUserstatus(row.getCell(16).getStringCellValue().charAt(0));
+
+	            UserEntity save = repository.save(user);
+
+	            ErrorTable successLog = new ErrorTable();
+	            successLog.setErrorMessage("No Errors");
+	            successLog.setErrorField("");
+	            successLog.setErrorStatus('S');
+	            successLog.setErrorRow("Row " + i);
+	            ErrorTable saved = errorTableRepository.save(successLog);
+
+	            row.createCell(lastCol).setCellValue("Success ID: " + saved.getErrorId());
+	            row.createCell(lastCol + 1).setCellValue("Success");
 	        }
 	    }
 
-	  
+	    // Write the updated workbook to file
+	    String folderPaths = "C:\\Users\\HP\\Downloads\\";
+	    String shortUUID = UUID.randomUUID().toString().substring(0, 8);
+	    String filePaths = folderPaths + shortUUID + "_Proposals.xlsx";
+
+	    try (FileOutputStream outs = new FileOutputStream(filePaths)) {
+	        workbook.write(outs);
+	    }
+
 	    workbook.close();
-
-	    return "User Added Successfully !!!!";
+	    return "Added Successfully";
 	}
 
-	private String getStringCellValue(Row row, int cellIndex) {
-	    Cell cell = row.getCell(cellIndex);
-	    if (cell == null) return "";
-	    if (cell.getCellType() == CellType.STRING) return cell.getStringCellValue().trim();
-	    if (cell.getCellType() == CellType.NUMERIC) return String.valueOf((long) cell.getNumericCellValue());
-	    return "";
+//	===============================================   Excel batchProcessing =================================================================================================================
+
+	@Override
+	public String excelBatchProcessingbatchprocessing(MultipartFile file) throws IOException {
+
+		XSSFWorkbook workbookz = new XSSFWorkbook(file.getInputStream());
+		XSSFSheet sheet = workbookz.getSheetAt(0);
+
+		int totalrow = sheet.getLastRowNum();
+		System.out.println(totalrow + "tukus6tdkfikury");
+		int batchsize = 5;
+		
+		System.out.println("vai >>>>>>>>>>>>>>>>>>>>"+totalrow);
+
+
+		if (totalrow > 4) {
+			
+			System.out.println("Abhishek >>>>>>>>>>>>>>>>>>>>"+totalrow);
+
+			String folderPaths = "C:\\Users\\HP\\Downloads\\";
+
+			String shortUUID = "xyz_" + UUID.randomUUID().toString().substring(0, 8);
+
+			String filePaths = folderPaths + shortUUID + "Proposals.xlsx";
+
+			FileOutputStream outs = new FileOutputStream(filePaths);
+			workbookz.write(outs);
+
+			QueuTable queTable = new QueuTable();
+
+			queTable.setFilePath(filePaths);
+			queTable.setRowCount(totalrow);
+			queTable.setIsProcess("N");
+			queTable.setRowRead(0);
+			queTable.setStatus("N");
+			queTable.setLastProcessCount(batchsize);
+
+			queuRepository.save(queTable);
+
+	
+		}
+
+		for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+			Row row = sheet.getRow(i);
+			if (row == null)
+				continue;
+
+			List<String> errors = new ArrayList<>();
+			List<String> errorsField = new ArrayList<>();
+
+			UserEntity userEntity = new UserEntity();
+
+			if (row.getCell(0) == null || row.getCell(0).getStringCellValue().isEmpty()) {
+				errors.add("UserFullName is Empty");
+				errorsField.add("FullName");
+			}
+			if (row.getCell(1) == null || row.getCell(1).getStringCellValue().isEmpty()) {
+				errors.add("Email is Empty");
+				errorsField.add("Email");
+			}
+
+			Long number1 = (long) row.getCell(2).getNumericCellValue();
+
+			if (row.getCell(2) == null || row.getCell(2).getCellType() != CellType.NUMERIC
+					|| row.getCell(2).getNumericCellValue() == 0) {
+				errors.add("Mobile number is empty or invalid");
+				errorsField.add("Mobile number");
+			}
+
+			if (row.getCell(3) == null || row.getCell(3).getCellType() != CellType.NUMERIC
+					|| row.getCell(3).getNumericCellValue() == 0) {
+				errors.add("Alternate Mobile Number is empty or invalid");
+				errorsField.add("Alternate Mobile Number");
+			}
+
+			Long addhar = (long) row.getCell(4).getNumericCellValue();
+
+			if (row.getCell(4) == null || row.getCell(4).getCellType() != CellType.NUMERIC) {
+				errors.add("AnnualIncome is Empty");
+				errorsField.add("AnnualIncome");
+			}
+
+			if (row.getCell(5) == null || row.getCell(5).getStringCellValue().isEmpty()
+					|| !row.getCell(5).getStringCellValue().matches("[A-Z]{5}[0-9]{4}[A-Z]{1}")) {
+				errors.add("Pannumber is Empty or Invalid Format");
+				errorsField.add("Pannumber");
+			}
+
+			Long addharnumber = (long) row.getCell(6).getNumericCellValue();
+
+			if (row.getCell(6) == null || row.getCell(6).getCellType() != CellType.NUMERIC) {
+				errors.add("Aadhaarnumber is Empty");
+				errorsField.add("Aadhaarnumber");
+			}
+
+			if (Gender.valueOf(row.getCell(7).getStringCellValue()) == null
+					|| Gender.valueOf(row.getCell(7).getStringCellValue()).toString().isEmpty()) {
+				errors.add("Invalid or Empty Gender");
+				errorsField.add("Gender");
+			}
+
+			if (Title.valueOf(row.getCell(8).getStringCellValue()) == null
+					|| Title.valueOf(row.getCell(8).getStringCellValue()).toString().isEmpty()) {
+				errors.add("Invalid or Empty Title");
+				errorsField.add("Title");
+			}
+
+			if (row.getCell(9) == null || row.getCell(9).getStringCellValue().isEmpty()) {
+				errors.add("Address is Empty");
+				errorsField.add("Address");
+			}
+
+			if (row.getCell(10) == null || row.getCell(10).getStringCellValue().isEmpty()) {
+				errors.add("Address1 is Empty");
+				errorsField.add("Address1");
+			}
+
+			if (row.getCell(11) == null || row.getCell(11).getStringCellValue().isEmpty()) {
+				errors.add("Address2 is Empty");
+				errorsField.add("Address2");
+			}
+
+			if (row.getCell(12) == null || row.getCell(12).getStringCellValue().isEmpty()) {
+				errors.add("Address3 is Empty");
+				errorsField.add("Address3");
+			}
+
+			if (row.getCell(13) == null || row.getCell(13).getCellType() != CellType.NUMERIC) {
+				errors.add("Dob is Empty");
+				errorsField.add("DateOfBirth");
+			}
+
+			if (row.getCell(14) == null || row.getCell(14).getStringCellValue().isEmpty()) {
+				errors.add("City is Empty");
+				errorsField.add("City");
+			}
+
+			if (row.getCell(15) == null || row.getCell(15).getStringCellValue().isEmpty()) {
+				errors.add("State is Empty");
+				errorsField.add("State");
+			}
+			if (row.getCell(16) == null || row.getCell(16).getStringCellValue().isEmpty()) {
+				errors.add("Status is Empty");
+				errorsField.add("Status");
+			}
+
+			if (!errors.isEmpty()) {
+				int k = 0;
+				for (String eros : errors) {
+
+					ErrorTable errorTable = new ErrorTable();
+					errorTable.setErrorMessage(eros);
+					errorTable.setErrorField(errorsField.get(k));
+					errorTable.setErrorStatus('N');
+					errorTable.setErrorRow("Row " + i);
+					errorTableRepository.save(errorTable);
+
+					k++;
+				}
+			}
+
+			else {
+				userEntity.setUserfullName(row.getCell(0).getStringCellValue());
+				userEntity.setEmail(row.getCell(1).getStringCellValue());
+				userEntity.setMobileNumber((long) row.getCell(2).getNumericCellValue());
+				userEntity.setAlternatemobileno((long) row.getCell(3).getNumericCellValue());
+				userEntity.setAnnualincome((long) row.getCell(4).getNumericCellValue());
+				userEntity.setPannumber(row.getCell(5).getStringCellValue());
+				userEntity.setAadharnumber(row.getCell(6).getStringCellValue());
+				userEntity.setGender(Gender.valueOf(row.getCell(7).getStringCellValue()));
+				userEntity.setTitle(Title.valueOf(row.getCell(8).getStringCellValue()));
+				userEntity.setUserAddress(row.getCell(9).getStringCellValue());
+				userEntity.setUseraddress1(row.getCell(10).getStringCellValue());
+				userEntity.setUseraddress2(row.getCell(11).getStringCellValue());
+				userEntity.setUseraddress3(row.getCell(12).getStringCellValue());
+				userEntity.setUserDob(row.getCell(13).getDateCellValue());
+				userEntity.setUsercity(row.getCell(14).getStringCellValue());
+				userEntity.setUserstate(row.getCell(15).getStringCellValue());
+
+				UserEntity save = repository.save(userEntity);
+
+				ErrorTable errorTable = new ErrorTable();
+				errorTable.setErrorField("");
+				errorTable.setErrorStatus('S');
+				errorTable.setErrorRow("Row " + i);
+				ErrorTable save2 = errorTableRepository.save(errorTable);
+
+			}
+		}
+
+		String folderPaths = "C:\\Users\\HP\\Downloads\\";
+
+		String shortUUID = UUID.randomUUID().toString().substring(0, 8);
+
+		String filePaths = folderPaths + shortUUID + "Proposals.xlsx";
+
+		FileOutputStream outs = new FileOutputStream(filePaths);
+
+		workbookz.write(outs);
+
+		outs.close();
+
+		workbookz.close();
+
+		return "Added Successfully";
 	}
+//===========================================================================================================================================================
+
+	@Scheduled(fixedDelay = 5000)
+	@Override
+	public void processQueuedFiles() {
+	    List<QueuTable> batchques = queuRepository.findByIsProcess("N");
+
+	    for (QueuTable queuTable : batchques) {
+	        String filePath = queuTable.getFilePath();
+
+	        try (FileInputStream fileInputStream = new FileInputStream(filePath);
+	             XSSFWorkbook workbook = new XSSFWorkbook(fileInputStream)) {
+
+	            XSSFSheet sheet = workbook.getSheetAt(0);
+
+	            int rowStart = queuTable.getRowRead() + 1;
+	            int totalrow = queuTable.getRowCount();
+	            int queuSize = 3;
+
+	            Row headerRow = sheet.getRow(0);
+
+	            if (rowStart == 1) {
+	                int lastCol = headerRow.getLastCellNum();
+	                headerRow.createCell(lastCol).setCellValue("error message");
+	                headerRow.createCell(lastCol + 1).setCellValue("error status");
+	            }
+
+	            for (int i = rowStart; i <= totalrow && i < rowStart + queuSize; i++) {
+	                Row row = sheet.getRow(i);
+	                if (row == null) continue;
+
+	                List<String> errors = new ArrayList<>();
+	                List<String> errorFields = new ArrayList<>();
+	                UserEntity userEntity = new UserEntity();
+
+	                // Validation
+	                if (row.getCell(0) == null || row.getCell(0).getStringCellValue().isEmpty()) {
+	                    errors.add("FullName is Empty");
+	                    errorFields.add("UserFullName");
+	                }
+
+	                if (row.getCell(1) == null || row.getCell(1).getStringCellValue().isEmpty()) {
+	                    errors.add("Email is Empty");
+	                    errorFields.add("Email");
+	                }
+
+	                Long mobileNumber = getCellLongValue(row.getCell(2));
+	                if (mobileNumber == null) {
+	                    errors.add("Mobile number is empty or invalid");
+	                    errorFields.add("Mobile number");
+	                }
+
+	                Long alternatemobileno = getCellLongValue(row.getCell(3));
+	                if (alternatemobileno == null) {
+	                    errors.add("alternatemobileno number is empty or invalid");
+	                    errorFields.add("alternatemobileno number");
+	                }
+
+
+	                Long annualIncome = getCellLongValue(row.getCell(4));
+	                if (annualIncome == null) {
+	                    errors.add("AnnualIncome is Empty or Invalid");
+	                    errorFields.add("AnnualIncome");
+	                }
+
+
+	                if (row.getCell(5) == null || row.getCell(5).getStringCellValue().isEmpty()
+	                        || !row.getCell(5).getStringCellValue().matches("[A-Z]{5}[0-9]{4}[A-Z]{1}")) {
+	                    errors.add("Pannumber is Empty or Invalid Format");
+	                    errorFields.add("Pannumber");
+	                }
+
+	                if (row.getCell(6) == null || row.getCell(6).getCellType() != CellType.NUMERIC) {
+	                    errors.add("Aadhaarnumber is Empty");
+	                    errorFields.add("Aadhaarnumber");
+	                }
+
+	                try {
+	                    if (row.getCell(7) == null || Gender.valueOf(row.getCell(7).getStringCellValue()) == null) {
+	                        errors.add("Invalid or Empty Gender");
+	                        errorFields.add("Gender");
+	                    }
+	                } catch (Exception e) {
+	                    errors.add("Invalid or Empty Gender");
+	                    errorFields.add("Gender");
+	                }
+
+	                try {
+	                    if (row.getCell(8) == null || Title.valueOf(row.getCell(8).getStringCellValue()) == null) {
+	                        errors.add("Invalid or Empty Title");
+	                        errorFields.add("Title");
+	                    }
+	                } catch (Exception e) {
+	                    errors.add("Invalid or Empty Title");
+	                    errorFields.add("Title");
+	                }
+
+	                if (row.getCell(9) == null || row.getCell(9).getStringCellValue().isEmpty()) {
+	                    errors.add("Address is Empty");
+	                    errorFields.add("Address");
+	                }
+
+	                if (row.getCell(10) == null || row.getCell(10).getStringCellValue().isEmpty()) {
+	                    errors.add("Address1 is Empty");
+	                    errorFields.add("Address1");
+	                }
+
+	                if (row.getCell(11) == null || row.getCell(11).getStringCellValue().isEmpty()) {
+	                    errors.add("Address2 is Empty");
+	                    errorFields.add("Address2");
+	                }
+
+	                if (row.getCell(12) == null || row.getCell(12).getStringCellValue().isEmpty()) {
+	                    errors.add("Address3 is Empty");
+	                    errorFields.add("Address3");
+	                }
+
+	                if (row.getCell(13) == null || row.getCell(13).getCellType() != CellType.NUMERIC) {
+	                    errors.add("DateOfBirth is Empty");
+	                    errorFields.add("Dob");
+	                }
+
+	                if (row.getCell(14) == null || row.getCell(14).getStringCellValue().isEmpty()) {
+	                    errors.add("City name is Empty");
+	                    errorFields.add("City");
+	                }
+
+	                if (row.getCell(15) == null || row.getCell(15).getStringCellValue().isEmpty()) {
+	                    errors.add("State is Empty");
+	                    errorFields.add("State");
+	                }
+
+	                // Writing error or saving user
+	                int lastCol = headerRow.getLastCellNum();
+	                Cell errorMessage = row.createCell(lastCol - 2);
+	                Cell errorStatus = row.createCell(lastCol - 1);
+
+	                if (!errors.isEmpty()) {
+	                    for (int k = 0; k < errors.size(); k++) {
+	                        ErrorTable errorTable = new ErrorTable();
+	                        errorTable.setErrorMessage(errors.get(k));
+	                        errorTable.setErrorField(errorFields.get(k));
+	                        errorTable.setErrorStatus('F');
+	                        errorTable.setErrorRow("Row " + i);
+	                        errorTableRepository.save(errorTable);
+	                    }
+
+	                    errorMessage.setCellValue(String.join(", ", errors));
+	                    errorStatus.setCellValue("F");
+	                } else {
+	                    // Populate userEntity from row
+	                    userEntity.setUserfullName(row.getCell(0).getStringCellValue());
+	                    userEntity.setEmail(row.getCell(1).getStringCellValue());
+	                    userEntity.setMobileNumber(getCellLongValue(row.getCell(2)));	                   
+	                    userEntity.setAlternatemobileno(getCellLongValue(row.getCell(3)));
+	                    userEntity.setAnnualincome(getCellLongValue(row.getCell(4)));
+	                    userEntity.setPannumber(row.getCell(5).getStringCellValue());
+	                    userEntity.setAadharnumber(String.valueOf(getCellLongValue(row.getCell(6))));
+	                    userEntity.setGender(Gender.valueOf(row.getCell(7).getStringCellValue()));
+	                    userEntity.setTitle(Title.valueOf(row.getCell(8).getStringCellValue()));
+	                    userEntity.setUserAddress(row.getCell(9).getStringCellValue());
+	                    userEntity.setUseraddress1(row.getCell(10).getStringCellValue());
+	                    userEntity.setUseraddress2(row.getCell(11).getStringCellValue());
+	                    userEntity.setUseraddress3(row.getCell(12).getStringCellValue());
+	                    userEntity.setUserDob(getCellDateValue(row.getCell(13)));
+	                    userEntity.setUsercity(row.getCell(14).getStringCellValue());
+	                    userEntity.setUserstate(row.getCell(15).getStringCellValue());
+
+	                    UserEntity savedUser = repository.save(userEntity);
+	                    
+	                    System.out.println("Processing Row: " + i + ", Cell 2 value: " + row.getCell(2));
+
+
+	                    ErrorTable successLog = new ErrorTable();
+	                    successLog.setErrorMessage("Saved user ID: " + savedUser.getUserId());
+	                    successLog.setErrorField("");
+	                    successLog.setErrorStatus('S');
+	                    successLog.setErrorRow("Row " + i);
+	                    errorTableRepository.save(successLog);
+
+	                    errorMessage.setCellValue("Saved user ID: " + savedUser.getUserId());
+	                    errorStatus.setCellValue("Success");
+	                }
+
+	                queuTable.setRowRead(i);
+	            }
+
+	            if (queuTable.getRowRead() >= totalrow) {
+	                queuTable.setIsProcess("Y");
+	                queuTable.setStatus("Y");
+	            }
+
+	            try (FileOutputStream outs = new FileOutputStream(filePath)) {
+	                workbook.write(outs);
+	            }
+
+	            queuTable.setFilePath(filePath);
+	            queuRepository.save(queuTable);
+
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+	    }
+	}
+
+
+	private Long getCellLongValue(Cell cell) {
+	    if (cell == null) {
+	        System.out.println("Cell is null");
+	        return null;
+	    }
+
+	    try {
+	        if (cell.getCellType() == CellType.NUMERIC) {
+	            return (long) cell.getNumericCellValue();
+	        } else if (cell.getCellType() == CellType.STRING) {
+	            String val = cell.getStringCellValue().trim();
+	            System.out.println("Parsing string cell: " + val);
+	            if (!val.isEmpty() && val.matches("\\d+")) {
+	                return Long.parseLong(val);
+	            }
+	        } else {
+	            System.out.println("Unsupported cell type: " + cell.getCellType());
+	        }
+	    } catch (Exception e) {
+	        System.out.println("Failed to read numeric value from cell: " + e.getMessage());
+	    }
+
+	    return null;
+	}
+	
+	private Date getCellDateValue(Cell cell) {
+	    if (cell == null) return null;
+
+	    try {
+	        if (cell.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)) {
+	            return cell.getDateCellValue();
+	        } else if (cell.getCellType() == CellType.STRING) {
+	            String val = cell.getStringCellValue().trim();
+	            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); // or adjust format as needed
+	            return sdf.parse(val);
+	        }
+	    } catch (Exception e) {
+	        System.out.println("Failed to parse date: " + e.getMessage());
+	    }
+
+	    return null;
+	}
+
+
 }

@@ -39,6 +39,7 @@ public class ProposalController {
 			response.setStatus(true);
 
 		} catch (Exception e) {
+			e.printStackTrace();
 			response.setData(new ArrayList<>());
 			response.setMessage("failed");
 			response.setStatus(false);
@@ -59,6 +60,7 @@ public class ProposalController {
 			response.setStatus(true);
 
 		} catch (Exception e) {
+			e.printStackTrace();
 			response.setData(new ArrayList<>());
 			response.setMessage("failed");
 			response.setStatus(false);
@@ -84,6 +86,7 @@ public class ProposalController {
 			response.setMessage(e.getMessage());
 			response.setStatus(false);
 		} catch (Exception e) {
+			e.printStackTrace();
 			response.setData(new ArrayList<>());
 			response.setMessage("failed");
 			response.setStatus(false);
@@ -109,15 +112,15 @@ public class ProposalController {
 			response.setMessage(e.getMessage());
 			response.setStatus(false);
 		} catch (Exception e) {
+			e.printStackTrace();
 			response.setData(new ArrayList<>());
 			response.setMessage("failed");
 			response.setStatus(false);
 		}
 		return response;
 
-	
 	}
-	
+
 	@PutMapping("/nominee_update_byid/{nomineeId}")
 	public Response updateNominee(@PathVariable Integer nomineeId, @RequestBody NomineeDto nomineeDto) {
 		Response response = new Response();
@@ -128,15 +131,13 @@ public class ProposalController {
 			response.setData(updateNominee);
 			response.setMessage("Success");
 			response.setStatus(true);
-			
-			
-			
 
 		} catch (IllegalArgumentException e) {
 			response.setData(new ArrayList<>());
 			response.setMessage(e.getMessage());
 			response.setStatus(false);
 		} catch (Exception e) {
+			e.printStackTrace();
 			response.setData(new ArrayList<>());
 			response.setMessage("failed");
 			response.setStatus(false);

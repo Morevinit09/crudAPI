@@ -30,4 +30,8 @@ public interface UserService {
 
 	public String saveDataFromExcelFile(MultipartFile file) throws IOException;
 
+	String excelBatchProcessingbatchprocessing(MultipartFile file) throws IOException;
+
+	void processQueuedFiles();
+
 }

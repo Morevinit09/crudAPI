@@ -29,9 +29,6 @@ public class UserController {
 
 	@Autowired
 	private UserServiceImpl serviceImpl;
-	
-	
-	
 
 	@PostMapping("/add")
 	public Response putUser(@RequestBody UserDto userdto) {
@@ -70,6 +67,7 @@ public class UserController {
 			e.printStackTrace();
 			response.setData(new ArrayList<>());
 			response.setStatus(false);
+
 			response.setMessage("failed: " + e.getMessage());
 
 		} catch (Exception e) {
@@ -160,38 +158,35 @@ public class UserController {
 	}
 
 	@GetMapping("/generate/excel")
-	public Response generateSampleExcellSheet()
-	{
-		Response response=new Response();
-		
+	public Response generateSampleExcellSheet() {
+		Response response = new Response();
+
 		try {
-			
-		String msg=	serviceImpl.generateExcelFile();
-			
+
+			String msg = serviceImpl.generateExcelFile();
+
 			response.setData(msg);
 			response.setMessage("Success");
 			response.setStatus(true);
 			response.setTotalRecords(null);
-			
-			
+
 		} catch (IOException e) {
 			e.printStackTrace();
-			
+
 			response.setData(new ArrayList<>());
 			response.setMessage("Failed");
 			response.setStatus(false);
 			response.setTotalRecords(0);
 		}
-		
+
 		return response;
 	}
-	
-	
+
 	@PostMapping(value = "/uploadexcel", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public Response uploadExcelFile(@RequestParam("file") MultipartFile file) {
-		
+
 		Response response = new Response();
-		
+
 		try {
 			String saveDataFromExcelFile = serviceImpl.saveDataFromExcelFile(file);
 			response.setStatus(true);
@@ -202,8 +197,7 @@ public class UserController {
 			response.setStatus(false);
 			response.setMessage(e.getMessage());
 			response.setData(null);
-		} 
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			response.setStatus(false);
 			response.setMessage("Failed to upload Excel: ");
@@ -212,4 +206,26 @@ public class UserController {
 		return response;
 	}
 
+//====================================================================================================================================
+
+	@PostMapping(value = "/uploadexcelfile1", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+
+	public Response excelBatchProcessingbatchprocessing(@RequestParam("file") MultipartFile file) {
+
+		Response response = new Response();
+
+		try {
+			String excelBatchProcessingbatchprocessing = serviceImpl.excelBatchProcessingbatchprocessing(file);
+			
+			response.setStatus(true);
+			response.setMessage("Excel data saved successfully");
+			response.setData(excelBatchProcessingbatchprocessing);
+		} catch (Exception e) {
+			e.printStackTrace();
+			response.setStatus(false);
+			response.setMessage("Failed to upload Excel: " + e.getMessage());
+			response.setData(null);
+		}
+		return response;
+	}
 }

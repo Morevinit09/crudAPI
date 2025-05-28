@@ -16,16 +16,21 @@ public class ErrorTable {
 	private String errorField;
 	private Character errorStatus;
 	private String errorRow;
-	
-	
-	
-	
-	public String getErrorRow() {
-		return errorRow;
-	}
-	public void setErrorRow(String errorRow) {
+	public ErrorTable(Long errorId, String errorMessage, String errorField, Character errorStatus, String errorRow) {
+		super();
+		this.errorId = errorId;
+		this.errorMessage = errorMessage;
+		this.errorField = errorField;
+		this.errorStatus = errorStatus;
 		this.errorRow = errorRow;
 	}
+	
+	
+	public ErrorTable() {
+		super();
+	}
+
+
 	public Long getErrorId() {
 		return errorId;
 	}
@@ -50,12 +55,18 @@ public class ErrorTable {
 	public void setErrorStatus(Character errorStatus) {
 		this.errorStatus = errorStatus;
 	}
+	public String getErrorRow() {
+		return errorRow;
+	}
+	public void setErrorRow(String errorRow) {
+		this.errorRow = errorRow;
+	}
 	
 	
 	
+
 	
 	
-	
-	
+
 	
 }

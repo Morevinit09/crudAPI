@@ -21,62 +21,59 @@ public class UserEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long userId;
-	
+
 	@Column(name = "user_dob")
 	private Date userdob;
-	
+
 	@Column(name = "user_address")
-	private String useraddress;  
-	
+	private String useraddress;
+
 	@Column(name = "user_address1")
 	private String useraddress1;
-	
+
 	@Column(name = "user_address2")
 	private String useraddress2;
-	
+
 	@Column(name = "user_address3")
 	private String useraddress3;
-	
+
 	@Column(name = "user_city")
 	private String usercity;
-	
+
 	@Column(name = "user_state")
 	private String userstate;
-	
+
 	@Column(name = "user_full_name")
 	private String userfullName;
-	
+
 	@Column(name = "user_email")
 	private String email;
-	
+
 	@Column(name = "user_mobile_number")
 	private Long mobileNumber;
-	
+
 	@Column(name = "user_alternatemobileno")
 	private Long alternatemobileno;
-	
+
 	@Column(name = "user_annualincome")
 	private Long annualincome;
-	
+
 	@Column(name = "user_status")
 	private Character userstatus;
-	
+
 	@Column(name = "userPannumber")
 	private String pannumber;
-	
+
 	@Column(name = "user_aadharnumber")
 	private String aadharnumber;
-	
+
 	@Column(name = "gender")
 	@Enumerated(EnumType.STRING)
 	private Gender gender;
-	
+
 	@Column(name = "title")
 	@Enumerated(EnumType.STRING)
 	private Title title;
-	
-	
-   
 
 	public Date getUserdob() {
 		return userdob;
@@ -142,8 +139,6 @@ public class UserEntity {
 		this.userfullName = userfullName;
 	}
 
-	
-
 	public Long getAnnualincome() {
 		return annualincome;
 	}
@@ -151,9 +146,6 @@ public class UserEntity {
 	public void setAnnualincome(Long annualincome) {
 		this.annualincome = annualincome;
 	}
-
-	
-	
 
 	public String getPannumber() {
 		return pannumber;
@@ -179,9 +171,6 @@ public class UserEntity {
 		this.gender = gender;
 	}
 
-	
-
-	
 	public com.example.demo.enums.Title getTitle() {
 		return title;
 	}
@@ -198,7 +187,6 @@ public class UserEntity {
 		this.userstatus = userstatus;
 	}
 
-	
 	public Long getMobileNumber() {
 		return mobileNumber;
 	}
@@ -211,7 +199,6 @@ public class UserEntity {
 		return alternatemobileno;
 	}
 
-	
 	public void setAlternatemobileno(Long alternatemobileno) {
 		this.alternatemobileno = alternatemobileno;
 	}
@@ -233,8 +220,6 @@ public class UserEntity {
 		this.email = email;
 	}
 
-		
-
 	public Date getUserDob() {
 		return userdob;
 	}
@@ -250,5 +235,7 @@ public class UserEntity {
 	public void setUserAddress(String userAddress) {
 		this.useraddress = userAddress;
 	}
+
+
 
 }
