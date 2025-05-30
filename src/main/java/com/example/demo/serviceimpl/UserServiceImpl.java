@@ -306,6 +306,7 @@ public class UserServiceImpl implements UserService {
 				existingEntity.setUserDob(dob);
 			}
 
+
 			// State
 			String state = userdto.getUserState();
 			if (state != null && !state.trim().isEmpty()) {
@@ -761,7 +762,8 @@ public class UserServiceImpl implements UserService {
 				errorsField.add("Email");
 			}
 
-			Long number1 = (long) row.getCell(2).getNumericCellValue();
+			Long number1
+			= (long) row.getCell(2).getNumericCellValue();
 
 			if (row.getCell(2) == null || row.getCell(2).getCellType() != CellType.NUMERIC
 					|| row.getCell(2).getNumericCellValue() == 0) {
@@ -891,19 +893,13 @@ public class UserServiceImpl implements UserService {
 		}
 
 		String folderPaths = "C:\\Users\\HP\\Downloads\\";
-
 		String shortUUID = UUID.randomUUID().toString().substring(0, 8);
-
 		String filePaths = folderPaths + shortUUID + "Proposals.xlsx";
 
-		FileOutputStream outs = new FileOutputStream(filePaths);
-
-		workbookz.write(outs);
-
-		outs.close();
-
+		try (FileOutputStream outs = new FileOutputStream(filePaths)) {
+		    workbookz.write(outs);
+		}
 		workbookz.close();
-
 		return "Added Successfully";
 	}
 //===========================================================================================================================================================
