@@ -1,6 +1,8 @@
 
 package com.example.demo.serviceimpl;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,6 +22,7 @@ import com.example.demo.service.UserServiceJwt;
 @Service
 public class UserServiceimplJwt implements UserServiceJwt{
 
+	
 	
 	@Autowired
 	private UserRepositoryJwt usersRepository;
@@ -72,10 +75,14 @@ public class UserServiceimplJwt implements UserServiceJwt{
     			new UsernamePasswordAuthenticationToken(userName, userPassword)
     			);
 		
+		 Map<String, Object> extraClaims = new HashMap<>();
+ 	    extraClaims.put("userId", user.getId());
+ 	    extraClaims.put("email", user.getUserEmail()); 
+		
 		 final UserDetails userDetails = new org.springframework.security.core.userdetails.User(
 	    	        userName, userPassword, new ArrayList<>()
 	    	    );
-	    	    return jwtUtil.generateToken(user);
+	    	    return jwtUtil.generateToken(userDetails,extraClaims);
 		
 	}
 

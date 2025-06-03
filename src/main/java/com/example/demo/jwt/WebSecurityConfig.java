@@ -26,22 +26,33 @@ public class WebSecurityConfig {
 		this.jwtRequestFilter = jwtRequestFilter;
 	}
 
+
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http.csrf(csrf -> csrf.disable()).authorizeHttpRequests(auth -> auth
-				.requestMatchers("/auth/register", "/auth/login", "/swagger-ui.html/**", "/swagger-ui/**", "/v3/api-docs/**")
-				.permitAll().anyRequest().authenticated())
-	        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+	    http.csrf(csrf -> csrf.disable())
+	        .authorizeHttpRequests(auth -> auth
+	            .requestMatchers("/auth/register", "/auth/login",
+	                             "/swagger-ui.html/**", "/swagger-ui/**", "/v3/api-docs/**")
+	                .permitAll()
+	            .anyRequest()
+	                .authenticated()
+	        )
+	        .sessionManagement(session -> session
+	            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+	        )
 	        .authenticationProvider(authenticationProvider())
 	        .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
 	        .exceptionHandling(handling -> handling
-	            .authenticationEntryPoint((request, response, authException) -> 
-	                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized"))
+	            .authenticationEntryPoint((request, response, authException) -> {
+	                response.setContentType("application/json");
+	                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+	                response.getWriter().write("{\"error\": \"Please enter a valid token in Authorization header\"}");
+	            })
 	        );
 
 	    return http.build();
 	}
-	
+
 	        		
 	@Bean
 	public BCryptPasswordEncoder passwordEncoder() {

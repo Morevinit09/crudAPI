@@ -2,14 +2,17 @@ package com.example.demo.jwt;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.Map;
 import java.util.function.Function;
 
 import javax.crypto.SecretKey;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.entity.Users;
+import com.example.demo.entity.TokenEntity;
+import com.example.demo.repository.TokenRepository;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -18,6 +21,9 @@ import io.jsonwebtoken.security.Keys;
 
 @Service
 public class JwtUtil {
+	
+	@Autowired
+	private TokenRepository tokenRepository;
 
     // Secure key - must be at least 32 characters for HS256
     private static final String SECRET = "my-super-secret-key-that-is-strong-123!";
@@ -53,24 +59,31 @@ public class JwtUtil {
 
     private static long expiryDuration = 24L * 60L * 60L; // 24 hours 
 
-    public String generateToken(Users users) {
-    	
-    	long milliTime = System.currentTimeMillis();
-		long expiryTime = milliTime + expiryDuration * 1000;
-
-		Date issuedAt = new Date(milliTime);
-		Date expiryAt = new Date(expiryTime);
-		
-		String issuer = (users.getId() != null) ? users.getId() .toString() : "N/A";
-		Claims claims = Jwts.claims().setIssuer(issuer).setIssuedAt(issuedAt).setExpiration(expiryAt);
-		
-		claims.put("userName", users.getUserName());
-		claims.put("userEmail", users.getUserEmail());
-		claims.put("userMobileNumber", users.getUserMobileNumber() );
-		String token = Jwts.builder().setClaims(claims).signWith(SECRET_KEY, SignatureAlgorithm.HS256)
-				.compact();
-		
+    public String generateToken(UserDetails userDetails, Map<String, Object> extraClaims) {
+         String token = Jwts
+        	.builder()
+            .setClaims(extraClaims) // Custom claims add
+            .setSubject(userDetails.getUsername()) // Username (default claim)
+            .setIssuedAt(new Date())
+            .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 5))
+            .signWith(SECRET_KEY, SignatureAlgorithm.HS256)
+            .compact();
+         saveToken(userDetails.getUsername(), token);
+         
 		return token;
+    }
+    
+    public String saveToken(String userName,String token) {
+    	
+    	TokenEntity tokenEntity = new TokenEntity();
+    	
+    	tokenEntity.setUserName(userName);
+    	tokenEntity.setToken(token);
+    	tokenEntity.setExpireDate(new Date(System.currentTimeMillis() + 1000 * 60 * 5));
+    	tokenRepository.save(tokenEntity);
+    	
+    	
+    	return "Token Save SuccessFully";
     }
 
 

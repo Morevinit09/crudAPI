@@ -8,7 +8,7 @@ public class Response {
 	private String message;
 
 	private String error;    
-	private boolean status;
+	private boolean status; 
 	
 	
 	public Object getData() {

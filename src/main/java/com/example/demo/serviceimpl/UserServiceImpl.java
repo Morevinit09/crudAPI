@@ -1,4 +1,5 @@
 
+
 package com.example.demo.serviceimpl;
 
 import java.io.FileInputStream;
@@ -67,7 +68,7 @@ public class UserServiceImpl implements UserService {
 	 * private QueuTable queuTable; private Row headerRow2; private List<UserEntity>
 	 * errorsFields; private String status;
 	 */
-
+//===================================================ADD===================================================================================
 	@Override
 	public String addUserInfo(UserDto userdto) {
 
@@ -187,7 +188,7 @@ public class UserServiceImpl implements UserService {
 		return "User Added Successfully";
 	}
 
-//	=================================================================================================================================
+//	=========================================================UPDATE========================================================================
 
 	@Override
 	public String update(Long userId, UserDto userdto) {
@@ -320,7 +321,7 @@ public class UserServiceImpl implements UserService {
 			return "User with ID " + userId + " not found";
 		}
 	}
-
+//=====================================================DELETE=============================================================================
 	@Override
 	public Void deleteUserById(Long userId) {
 		Optional<UserEntity> findbyuserid = repository.findById(userId);
@@ -373,7 +374,7 @@ public class UserServiceImpl implements UserService {
 
 	}
 
-//	========================================================================================================================
+//	===================================================PAGINATION MAP USING LIST=================================================================
 
 	@Override
 	public List<Map<String, Object>> findAllWithPagination(UserPagination pagination) {
@@ -481,6 +482,8 @@ public class UserServiceImpl implements UserService {
 		map.put("useraddress1", userEntity.getUseraddress1());
 		map.put("useraddress2", userEntity.getUseraddress2());
 		map.put("useraddress3", userEntity.getUseraddress3());
+		
+		
 		map.put("userdob", userEntity.getUserdob());
 		map.put("usercity", userEntity.getUsercity());
 		map.put("userstate", userEntity.getUserstate());
@@ -488,7 +491,7 @@ public class UserServiceImpl implements UserService {
 		return map;
 	}
 
-//===================================================================================================================================
+//=====================================================Import Export Excel=============================================================
 	@Override
 	public String generateExcelFile() throws IOException {
 		XSSFWorkbook workbook = new XSSFWorkbook();
@@ -541,7 +544,8 @@ public class UserServiceImpl implements UserService {
 
 	    for (int i = 1; i <= sheet.getLastRowNum(); i++) {
 	        XSSFRow row = sheet.getRow(i);
-	        if (row == null) continue;
+	        if (row == null)
+	        	continue;
 
 	        List<String> errorList = new ArrayList<>();
 	        List<String> errorFiled = new ArrayList<>();
@@ -701,7 +705,7 @@ public class UserServiceImpl implements UserService {
 	    return "Added Successfully";
 	}
 
-//	===============================================   Excel batchProcessing =================================================================================================================
+//	=============================================== Excel batchProcessing =================================================================================================================
 
 	@Override
 	public String excelBatchProcessingbatchprocessing(MultipartFile file) throws IOException {
@@ -902,7 +906,7 @@ public class UserServiceImpl implements UserService {
 		workbookz.close();
 		return "Added Successfully";
 	}
-//===========================================================================================================================================================
+//=====================================Excel batchProcessing AND SCHEDULING==================================================================================
 
 	@Scheduled(fixedDelay = 5000)
 	@Override
@@ -1105,6 +1109,7 @@ public class UserServiceImpl implements UserService {
 	            e.printStackTrace();
 	        }
 	    }
+	    
 	}
 
 
@@ -1147,7 +1152,7 @@ public class UserServiceImpl implements UserService {
 	    } catch (Exception e) {
 	        System.out.println("Failed to parse date: " + e.getMessage());
 	    }
-
+ 
 	    return null;
 	}
 

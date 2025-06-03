@@ -92,7 +92,6 @@ public class ProposalServiceImpl implements ProposalService {
 		if (byProposalIdAndStatus.isPresent()) {
 
 			Proposal proposal = byProposalIdAndStatus.get();
-
 			proposal.setProposalName(proposalDto.getProposalName());
 			proposal.setProposalMobileNumber(proposalDto.getProposalMobileNumber());
 			proposal.setProposalAge(proposalDto.getProposalAge());

@@ -170,7 +170,4 @@ public class UserDto {
 	public void setTitle(com.example.demo.enums.Title title) {
 		this.title = title;
 	}
-
-	
-	
 }
