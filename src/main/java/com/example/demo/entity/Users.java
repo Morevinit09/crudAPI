@@ -10,23 +10,23 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "user_table_jwt")
 public class Users {
-    
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
+
 	@Column(name = "user_name")
 	private String userName;
-	
-	@Column(name = "user_password")
+
+	@Column(name = "User_password")
 	private String userPassword;
-	
+
 	@Column(name = "user_email")
 	private String userEmail;
-	
+
 	@Column(name = "user_mobile_number")
 	private Long userMobileNumber;
-	
+
 	public Users() {
 		// TODO Auto-generated constructor stub
 	}
@@ -79,9 +79,5 @@ public class Users {
 	public void setUserMobileNumber(Long userMobileNumber) {
 		this.userMobileNumber = userMobileNumber;
 	}
-	
-	
-	
-	
-	
+
 }

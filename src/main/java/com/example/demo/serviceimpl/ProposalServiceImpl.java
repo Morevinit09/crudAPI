@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,8 @@ public class ProposalServiceImpl implements ProposalService {
 	private static final Response Response = null;
 
 	@Autowired
+	private ModelMapper mapper;
+	@Autowired
 	private ProposalRepository proposalRepository;
 
 	@Autowired
@@ -29,36 +32,46 @@ public class ProposalServiceImpl implements ProposalService {
 
 	@Override
 	public Proposal addProposal(ProposalDto proposalDto) {
-		Proposal newProposal = new Proposal();
+		/*
+		 * Proposal newProposal = new Proposal();
+		 * 
+		 * newProposal.setProposalName(proposalDto.getProposalName());
+		 * newProposal.setProposalAge(proposalDto.getProposalAge());
+		 * newProposal.setProposalMobileNumber(proposalDto.getProposalMobileNumber());
+		 * newProposal.setProposalDateOfBirth(proposalDto.getProposalDateOfBirth());
+		 * newProposal.setStatus('Y');
+		 */
 
-		newProposal.setProposalName(proposalDto.getProposalName());
-		newProposal.setProposalAge(proposalDto.getProposalAge());
-		newProposal.setProposalMobileNumber(proposalDto.getProposalMobileNumber());
-		newProposal.setProposalDateOfBirth(proposalDto.getProposalDateOfBirth());
-		newProposal.setStatus('Y');
+		Proposal proposal = mapper.map(ProposalDto.class, Proposal.class);
+		proposal.setStatus('Y');
 
 		List<NomineeDto> nomineeDtos = proposalDto.getNomineeDtos();
 
 		List<Nominee> nomineeslist = new ArrayList<>();
 
-		for (NomineeDto nomineeDto : nomineeDtos) {
-			Nominee nominee = new Nominee();
+//		for (NomineeDto nomineeDto : nomineeDtos) {
+//			Nominee nominee = new Nominee();
 
-			nominee.setNomineeName(nomineeDto.getNomineeName());
-			nominee.setNomineeMobileNumber(nomineeDto.getNomineeMobileNumber());
-			nominee.setNomineeDateOfBirth(nomineeDto.getNomineeDateOfBirth());
-			nominee.setStatus('Y');
-			nominee.setNomineeAge(nomineeDto.getNomineeAge());
-			nominee.setProposal(newProposal);
+//			nominee.setNomineeName(nomineeDto.getNomineeName());
+//			nominee.setNomineeMobileNumber(nomineeDto.getNomineeMobileNumber());
+//			nominee.setNomineeDateOfBirth(nomineeDto.getNomineeDateOfBirth());
+//			nominee.setStatus('Y');
+//			nominee.setNomineeAge(nomineeDto.getNomineeAge());
+//			nominee.setProposal(proposal);
+//
+//			nomineeslist.add(nominee);
+//		}
+//
+//		proposal.setNominees(nomineeslist);
+//
+//		Proposal prosalAndNominee = proposalRepository.save(proposal);
+//
+//		return prosalAndNominee;
+//
+		Nominee nominee = mapper.map(NomineeDto.class, Nominee.class);
+		proposal.setStatus('N');
+		return proposal;
 
-			nomineeslist.add(nominee);
-		}
-
-		newProposal.setNominees(nomineeslist);
-
-		Proposal prosalAndNominee = proposalRepository.save(newProposal);
-
-		return prosalAndNominee;
 	}
 
 	@Override
@@ -104,25 +117,24 @@ public class ProposalServiceImpl implements ProposalService {
 
 		return "Update Success!!";
 	}
-	
+
 	@Override
 	public Response updateNominee(Integer nomineeId, NomineeDto nomineeDto) {
-		Optional<Nominee> byNomineeIdAndStatus = nomineeRepository.findByNomineeIdAndStatus(nomineeId,'Y');
-		
+		Optional<Nominee> byNomineeIdAndStatus = nomineeRepository.findByNomineeIdAndStatus(nomineeId, 'Y');
+
 		if (byNomineeIdAndStatus.isPresent()) {
 			Nominee nominee = byNomineeIdAndStatus.get();
 			nominee.setNomineeName(nomineeDto.getNomineeName());
 			nominee.setNomineeDateOfBirth(nominee.getNomineeDateOfBirth());
 			nominee.setNomineeMobileNumber(nominee.getNomineeMobileNumber());
 			nominee.setNomineeAge(nominee.getNomineeAge());
-			
+
 			nomineeRepository.save(nominee);
-			
+
 		}
-		return Response; 
-		
+		return Response;
+
 	}
-	
 
 	@Override
 	public List<ProposalDto> getAllProposalWithNominee() {
@@ -130,8 +142,6 @@ public class ProposalServiceImpl implements ProposalService {
 		List<Proposal> mainEntity = proposalRepository.findAll();
 
 		List<ProposalDto> propssalDto = new ArrayList<>();
-
-		
 
 		for (Proposal proposal : mainEntity) {
 
@@ -149,6 +159,7 @@ public class ProposalServiceImpl implements ProposalService {
 
 				NomineeDto nomineeDtoz = new NomineeDto();
 
+				
 				nomineeDtoz.setNomineeName(nominee.getNomineeName());
 				nomineeDtoz.setNomineeDateOfBirth(nominee.getNomineeDateOfBirth());
 				nomineeDtoz.setNomineeAge(nominee.getNomineeAge());
@@ -166,6 +177,4 @@ public class ProposalServiceImpl implements ProposalService {
 		return propssalDto;
 	}
 
-	
 }
-

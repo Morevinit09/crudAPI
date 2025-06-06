@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -51,7 +52,7 @@ public class UserServiceimplJwt implements UserServiceJwt{
 		if (existsByUserName) {
 			throw new IllegalArgumentException("Username Already exist !!!");
 		}
-		
+
 		String encode = passwordEncoder.encode(userPassword);
 		Users user = new Users();
 		user.setUserName(userName);
@@ -63,7 +64,7 @@ public class UserServiceimplJwt implements UserServiceJwt{
 		
 		
 		return "User Added Successfully!!!";
-	}
+	}                  
 
 	@Override
 	public String login(String userName, String userPassword) {
@@ -78,6 +79,8 @@ public class UserServiceimplJwt implements UserServiceJwt{
 		 Map<String, Object> extraClaims = new HashMap<>();
  	    extraClaims.put("userId", user.getId());
  	    extraClaims.put("email", user.getUserEmail()); 
+ 	    extraClaims.put("userMobileNumber",user.getUserMobileNumber());
+ 	    
 		
 		 final UserDetails userDetails = new org.springframework.security.core.userdetails.User(
 	    	        userName, userPassword, new ArrayList<>()

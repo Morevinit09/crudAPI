@@ -16,6 +16,7 @@ public class NomineeDto {
 	public void setNomineeName(String nomineeName) {
 		this.nomineeName = nomineeName;
 	}
+	
 
 	public Long getNomineeMobileNumber() {
 		return nomineeMobileNumber;

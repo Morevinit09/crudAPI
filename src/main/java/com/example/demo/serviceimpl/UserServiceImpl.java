@@ -1,5 +1,3 @@
-
-
 package com.example.demo.serviceimpl;
 
 import java.io.FileInputStream;
@@ -386,7 +384,8 @@ public class UserServiceImpl implements UserService {
 
 		List<SearchFilter> searchFilters = pagination.getSearchFilter();
 
-		// Apply filters (same as before)
+		// Apply filters (same as before)\
+		
 		if (searchFilters != null && !searchFilters.isEmpty()) {
 			for (SearchFilter searchFilter : searchFilters) {
 				String userfullName = searchFilter.getUserfullName();
